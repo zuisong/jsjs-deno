@@ -145,7 +145,9 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
         throw err;
       }
     } finally {
-      if (node.finalizer) return evaluate(node.finalizer, scope);
+      if (node.finalizer) {
+        evaluate(node.finalizer, scope);
+      }
     }
   },
 
@@ -162,6 +164,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
       if (result === BREAK_SINGAL) {
         break;
       } else if (result === CONTINUE_SINGAL) {
+        continue;
       } else if (result === RETURN_SINGAL) {
         return result;
       }
@@ -176,6 +179,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
       if (result === BREAK_SINGAL) {
         break;
       } else if (result === CONTINUE_SINGAL) {
+        continue;
       } else if (result === RETURN_SINGAL) {
         return result;
       }
@@ -193,6 +197,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
       if (result === BREAK_SINGAL) {
         break;
       } else if (result === CONTINUE_SINGAL) {
+        continue;
       } else if (result === RETURN_SINGAL) {
         return result;
       }
@@ -212,6 +217,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
       if (result === BREAK_SINGAL) {
         break;
       } else if (result === CONTINUE_SINGAL) {
+        continue;
       } else if (result === RETURN_SINGAL) {
         return result;
       }
@@ -336,7 +342,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
     let $var: Var;
     if (node.argument.type === "Identifier") {
       const { name } = node.argument;
-      $var = <Var>scope.$find(name);
+      $var = scope.$find(name);
       if (!$var) throw `${name} 未定义`;
     } else if (node.argument.type === "MemberExpression") {
       const argument = node.argument;

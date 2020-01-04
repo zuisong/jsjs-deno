@@ -1,0 +1,12 @@
+{
+  "name": "jsjs-deno",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:ZuiSong/jsjs-deno.git",
+  "author": "zuisong <com.me@foxmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^3.7.4",
+    "typescript-deno-plugin": "^1.2.7"
+  }
+}

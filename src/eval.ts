@@ -68,7 +68,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
 
   LabeledStatement: (node: ESTree.LabeledStatement, scope: Scope) => {
-    `${node.type} 未实现`;
+    throw `${node.type} 未实现`;
   },
 
   BreakStatement: (node: ESTree.BreakStatement, scope: Scope) => {

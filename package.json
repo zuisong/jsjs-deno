@@ -6,6 +6,7 @@
   "author": "zuisong <com.me@foxmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "prettier": "^1.19.1",
     "typescript": "^3.7.4",
     "typescript-deno-plugin": "^1.2.7"
   }

@@ -83,22 +83,11 @@ export class Scope {
     }
   }
 
-  $let(raw_name: string, value: any): boolean {
+  private $declar_(raw_name: string, value: any, type: "let" | "const"): boolean {
     const name: string = this.prefix + raw_name;
     const $var = this.content.hasOwnProperty(name);
     if (!$var) {
-      this.content[name] = new ScopeVar("let", value);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  $const(raw_name: string, value: any): boolean {
-    const name: string = this.prefix + raw_name;
-    const $var = this.content.hasOwnProperty(name);
-    if (!$var) {
-      this.content[name] = new ScopeVar("const", value);
+      this.content[name] = new ScopeVar(type, value);
       return true;
     } else {
       return false;
@@ -124,8 +113,8 @@ export class Scope {
   $declar(kind: Kind, raw_name: string, value: any): boolean {
     let declares = {
       var: () => this.$var(raw_name, value),
-      let: () => this.$let(raw_name, value),
-      const: () => this.$const(raw_name, value)
+      let: () => this.$declar_(raw_name, value, "let"),
+      const: () => this.$declar_(raw_name, value, "const")
     };
     return declares[kind]();
   }

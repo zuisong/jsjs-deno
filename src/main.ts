@@ -57,21 +57,21 @@ const default_api: { [key: string]: any } = {
 
 export function run(code: string, append_api: { [key: string]: any } = {}) {
   const scope = new Scope("block");
-  scope.$const("this", this);
+  scope.$declar("const", "this", this);
 
   for (const name of Object.getOwnPropertyNames(default_api)) {
-    scope.$const(name, default_api[name]);
+    scope.$declar("const", name, default_api[name]);
   }
 
   for (const name of Object.getOwnPropertyNames(append_api)) {
-    scope.$const(name, append_api[name]);
+    scope.$declar("const", name, append_api[name]);
   }
 
   // 定义 module
   const $exports = {};
   const $module = { exports: $exports };
-  scope.$const("module", $module);
-  scope.$const("exports", $exports);
+  scope.$declar("const", "module", $module);
+  scope.$declar("const", "exports", $exports);
 
   const program = <ESTree.Node>acorn.parse(code, options);
   evaluate(program, scope);

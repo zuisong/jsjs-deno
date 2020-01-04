@@ -71,11 +71,7 @@ export interface NodeTypeMap {
 }
 
 export type EvaluateMap = {
-  [key in ESTree.Node["type"]]: (
-    node: NodeTypeMap[key],
-    scope: Scope,
-    arg?: any
-  ) => any;
+  [key in ESTree.Node["type"]]: (node: NodeTypeMap[key], scope: Scope, arg?: any) => any;
 };
 
 export type EvaluateFunc = (node: ESTree.Node, scope: Scope, arg?: any) => any;

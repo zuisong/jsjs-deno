@@ -6,9 +6,9 @@ import { Options } from "../acorn/index.d.ts";
 
 declare const require: (module: string) => any;
 const options: Options = {
-  ecmaVersion: 2015,
+  ecmaVersion: 8,
   sourceType: "script",
-  locations: true
+  locations: false
 };
 
 declare const Promise: any;
@@ -74,6 +74,7 @@ export function run(code: string, append_api: { [key: string]: any } = {}) {
   scope.$declar("const", "exports", $exports);
 
   const program = <ESTree.Node>acorn.parse(code, options);
+  console.log(JSON.stringify(program, null, 2));
   evaluate(program, scope);
 
   // exports

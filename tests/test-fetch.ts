@@ -11,6 +11,7 @@ fetch("https://api.github.com/emojis").then(res => {
 // language=JavaScript
 let code = `
 
+
   fetch("https://api.github.com/emojis").then(res => {
     res.json().then(it => {
       log.info(JSON.stringify(it, null, 2));
@@ -18,4 +19,4 @@ let code = `
   });
 
 `;
-interpreter.run(code, {fetch, Deno, log});
+interpreter.run(code, { fetch, Deno, log });

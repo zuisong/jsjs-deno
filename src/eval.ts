@@ -271,20 +271,37 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
 
   FunctionExpression: (node: ESTree.FunctionExpression, scope: Scope) => {
-    return function(...args) {
-      const new_scope = new Scope("function", scope);
-      new_scope.invasived = true;
-      for (let i = 0; i < node.params.length; i++) {
-        const { name } = <ESTree.Identifier>node.params[i];
-        new_scope.$declar("const", name, args[i]);
-      }
-      new_scope.$declar("const", "this", this);
-      new_scope.$declar("const", "arguments", arguments);
-      const result = evaluate(node.body, new_scope);
-      if (result === RETURN_SINGAL) {
-        return result.result;
-      }
-    };
+    if (node.async) {
+      return async function(...args) {
+        const new_scope = new Scope("function", scope);
+        new_scope.invasived = true;
+        for (let i = 0; i < node.params.length; i++) {
+          const { name } = <ESTree.Identifier>node.params[i];
+          new_scope.$declar("const", name, args[i]);
+        }
+        new_scope.$declar("const", "this", this);
+        new_scope.$declar("const", "arguments", arguments);
+        const result = evaluate(node.body, new_scope);
+        if (result === RETURN_SINGAL) {
+          return result.result;
+        }
+      };
+    } else {
+      return function(...args) {
+        const new_scope = new Scope("function", scope);
+        new_scope.invasived = true;
+        for (let i = 0; i < node.params.length; i++) {
+          const { name } = <ESTree.Identifier>node.params[i];
+          new_scope.$declar("const", name, args[i]);
+        }
+        new_scope.$declar("const", "this", this);
+        new_scope.$declar("const", "arguments", arguments);
+        const result = evaluate(node.body, new_scope);
+        if (result === RETURN_SINGAL) {
+          return result.result;
+        }
+      };
+    }
   },
 
   UnaryExpression: (node: ESTree.UnaryExpression, scope: Scope) => {
@@ -543,26 +560,45 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
     throw `${node.type} 未实现`;
   },
   ArrowFunctionExpression: (node: ESTree.ArrowFunctionExpression, scope: Scope) => {
-    return function(...args) {
-      const new_scope = new Scope("function", scope);
-      new_scope.invasived = true;
-      for (let i = 0; i < node.params.length; i++) {
-        const { name } = <ESTree.Identifier>node.params[i];
-        new_scope.$declar("const", name, args[i]);
-      }
-
-      const result = evaluate(node.body, new_scope);
-
-      if (node.expression) {
-        //(a,b)=> a+b
-        return result;
-      } else {
-        // (a,b)=>{return a+b}
-        if (result === RETURN_SINGAL) {
-          return result.result;
+    if (node.async) {
+      return async function(...args) {
+        const new_scope = new Scope("function", scope);
+        new_scope.invasived = true;
+        for (let i = 0; i < node.params.length; i++) {
+          const { name } = <ESTree.Identifier>node.params[i];
+          new_scope.$declar("const", name, args[i]);
         }
-      }
-    };
+        const result = evaluate(node.body, new_scope);
+        if (node.expression) {
+          //(a,b)=> a+b
+          return result;
+        } else {
+          // (a,b)=>{return a+b}
+          if (result === RETURN_SINGAL) {
+            return result.result;
+          }
+        }
+      };
+    } else {
+      return function(...args) {
+        const new_scope = new Scope("function", scope);
+        new_scope.invasived = true;
+        for (let i = 0; i < node.params.length; i++) {
+          const { name } = <ESTree.Identifier>node.params[i];
+          new_scope.$declar("const", name, args[i]);
+        }
+        const result = evaluate(node.body, new_scope);
+        if (node.expression) {
+          //(a,b)=> a+b
+          return result;
+        } else {
+          // (a,b)=>{return a+b}
+          if (result === RETURN_SINGAL) {
+            return result.result;
+          }
+        }
+      };
+    }
   }
 };
 

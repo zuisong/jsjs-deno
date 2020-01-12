@@ -27,7 +27,7 @@ export class ScopeVar implements Var {
 
   set value(value: any) {
     if (this.kind === "const" && this.inited) {
-      throw "const variable can not reassign";
+      throw "const variable cannot reassign";
       // this._value = value
     } else {
       this.inited = true;

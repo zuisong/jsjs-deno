@@ -562,6 +562,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   ArrowFunctionExpression: (node: ESTree.ArrowFunctionExpression, scope: Scope) => {
     if (node.async) {
       return async function(...args) {
+        // noinspection DuplicatedCode
         const new_scope = new Scope("function", scope);
         new_scope.invasived = true;
         for (let i = 0; i < node.params.length; i++) {
@@ -581,6 +582,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
       };
     } else {
       return function(...args) {
+        // noinspection DuplicatedCode
         const new_scope = new Scope("function", scope);
         new_scope.invasived = true;
         for (let i = 0; i < node.params.length; i++) {

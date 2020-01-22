@@ -60,16 +60,16 @@ export class PropVar implements Var {
 
 export class Scope {
   readonly type: ScopeType;
-  invasived: boolean;
+  readonly invasive: boolean;
   private readonly content: { [key: string]: Var };
   private readonly parent: Scope | null;
   private readonly prefix: string = "@";
 
-  constructor(type: ScopeType, parent?: Scope, label?: string) {
+  constructor(type: ScopeType, parent?: Scope, invasive = false, label?: string) {
     this.type = type;
     this.parent = parent || null;
     this.content = {};
-    this.invasived = false;
+    this.invasive = invasive;
   }
 
   $find(raw_name: string): Var | null {

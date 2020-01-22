@@ -1,11 +1,11 @@
 import * as ESTree from "../estree/index.d.ts";
 
-import { EvaluateFunc } from "./type.ts";
-import { PropVar, Scope, Var } from "./scope.ts";
+import {EvaluateFunc} from "./type.ts";
+import {PropVar, Scope, Var} from "./scope.ts";
 
 const BREAK_SINGAL: {} = {};
 const CONTINUE_SINGAL: {} = {};
-const RETURN_SINGAL: { result: any } = { result: undefined };
+const RETURN_SINGAL: { result: any } = {result: undefined};
 
 const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   Program: (program: ESTree.Program, scope: Scope) => {
@@ -35,7 +35,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
 
   BlockStatement: (block: ESTree.BlockStatement, scope: Scope) => {
-    let new_scope = scope.invasived ? scope : new Scope("block", scope);
+    let new_scope = scope.invasive ? scope : new Scope("block", scope);
     for (const node of block.body) {
       const result = evaluate(node, new_scope);
       if (result === BREAK_SINGAL || result === CONTINUE_SINGAL || result === RETURN_SINGAL) {
@@ -124,8 +124,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
     } catch (err) {
       if (node.handler) {
         const param = <ESTree.Identifier>node.handler.param;
-        const new_scope = new Scope("block", scope);
-        new_scope.invasived = true; // 标记为侵入式Scope，不用再多构造啦
+        const new_scope = new Scope("block", scope, true);
         new_scope.$declar("const", param.name, err);
         return evaluate(node.handler, new_scope);
       } else {
@@ -144,8 +143,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
 
   WhileStatement: (node: ESTree.WhileStatement, scope: Scope) => {
     while (evaluate(node.test, scope)) {
-      const new_scope = new Scope("loop", scope);
-      new_scope.invasived = true;
+      const new_scope = new Scope("loop", scope, true);
       const result = evaluate(node.body, new_scope);
 
       if (result === BREAK_SINGAL) {
@@ -160,8 +158,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
 
   DoWhileStatement: (node: ESTree.DoWhileStatement, scope: Scope) => {
     do {
-      const new_scope = new Scope("loop", scope);
-      new_scope.invasived = true;
+      const new_scope = new Scope("loop", scope, true);
       const result = evaluate(node.body, new_scope);
       if (result === BREAK_SINGAL) {
         break;
@@ -196,8 +193,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
     const name = (<ESTree.Identifier>decl.id).name;
 
     for (const value in evaluate(node.right, scope)) {
-      const new_scope = new Scope("loop", scope);
-      new_scope.invasived = true;
+      const new_scope = new Scope("loop", scope, true);
       scope.$declar(kind, name, value);
       const result = evaluate(node.body, new_scope);
       if (result === BREAK_SINGAL) {
@@ -212,7 +208,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
 
   FunctionDeclaration: (node: ESTree.FunctionDeclaration, scope: Scope) => {
     const func = evaluate_map["FunctionExpression"](<any>node, scope);
-    const { name: func_name } = node.id!!;
+    const {name: func_name} = node.id!!;
     if (!scope.$declar("const", func_name, func)) {
       throw `[Error] ${func_name} 重复定义`;
     }
@@ -221,7 +217,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   VariableDeclaration: (node: ESTree.VariableDeclaration, scope: Scope) => {
     const kind = node.kind;
     for (const declartor of node.declarations) {
-      const { name } = <ESTree.Identifier>declartor.id;
+      const {name} = <ESTree.Identifier>declartor.id;
       const value = declartor.init ? evaluate(declartor.init, scope) : undefined;
       if (!scope.$declar(kind, name, value)) {
         throw `[Error] ${name} 重复定义`;
@@ -260,9 +256,9 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
       if (kind === "init") {
         object[key] = value;
       } else if (kind === "set") {
-        Object.defineProperty(object, key, { set: value });
+        Object.defineProperty(object, key, {set: value});
       } else if (kind === "get") {
-        Object.defineProperty(object, key, { get: value });
+        Object.defineProperty(object, key, {get: value});
       } else {
         throw "这里绝对就错了";
       }
@@ -272,11 +268,10 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
 
   FunctionExpression: (node: ESTree.FunctionExpression, scope: Scope) => {
     if (node.async) {
-      return async function(...args) {
-        const new_scope = new Scope("function", scope);
-        new_scope.invasived = true;
+      return async function (...args) {
+        const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier>node.params[i];
+          const {name} = <ESTree.Identifier>node.params[i];
           new_scope.$declar("const", name, args[i]);
         }
         new_scope.$declar("const", "this", this);
@@ -287,11 +282,10 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
         }
       };
     } else {
-      return function(...args) {
-        const new_scope = new Scope("function", scope);
-        new_scope.invasived = true;
+      return function (...args) {
+        const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier>node.params[i];
+          const {name} = <ESTree.Identifier>node.params[i];
           new_scope.$declar("const", name, args[i]);
         }
         new_scope.$declar("const", "this", this);
@@ -322,7 +316,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
       delete: () => {
         // delete 是真麻烦
         if (node.argument.type === "MemberExpression") {
-          const { object, property, computed } = node.argument;
+          const {object, property, computed} = node.argument;
           if (computed) {
             return delete evaluate(object, scope)[evaluate(property, scope)];
           } else {
@@ -337,10 +331,10 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
 
   UpdateExpression: (node: ESTree.UpdateExpression, scope: Scope) => {
-    const { prefix } = node;
+    const {prefix} = node;
     let $var: Var;
     if (node.argument.type === "Identifier") {
-      const { name } = node.argument;
+      const {name} = node.argument;
       $var = scope.$find(name);
       if (!$var) throw `${name} 未定义`;
     } else if (node.argument.type === "MemberExpression") {
@@ -364,30 +358,30 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
     }[node.operator](evaluate(node.argument, scope));
   },
 
-  BinaryExpression: ({ left, operator, right }: ESTree.BinaryExpression, scope: Scope) => {
+  BinaryExpression: ({left, operator, right}: ESTree.BinaryExpression, scope: Scope) => {
     let operators: { [key in ESTree.BinaryOperator]: (x1, x2) => any } = {
-      "==": (a, b) => a == b,
-      "!=": (a, b) => a != b,
-      "===": (a, b) => a === b,
-      "!==": (a, b) => a !== b,
-      "<": (a, b) => a < b,
-      "<=": (a, b) => a <= b,
-      ">": (a, b) => a > b,
-      ">=": (a, b) => a >= b,
-      "<<": (a, b) => a << b,
-      ">>": (a, b) => a >> b,
-      ">>>": (a, b) => a >>> b,
-      "+": (a, b) => a + b,
-      "-": (a, b) => a - b,
-      "*": (a, b) => a * b,
-      "/": (a, b) => a / b,
-      "%": (a, b) => a % b,
-      "|": (a, b) => a | b,
-      "^": (a, b) => a ^ b,
-      "&": (a, b) => a & b,
-      "**": (a, b) => a ** b,
-      in: (a, b) => a in b,
-      instanceof: (a, b) => a instanceof b
+      '==': (a, b) => a == b,
+      '!=': (a, b) => a != b,
+      '===': (a, b) => a === b,
+      '!==': (a, b) => a !== b,
+      '<': (a, b) => a < b,
+      '<=': (a, b) => a <= b,
+      '>': (a, b) => a > b,
+      '>=': (a, b) => a >= b,
+      '<<': (a, b) => a << b,
+      '>>': (a, b) => a >> b,
+      '>>>': (a, b) => a >>> b,
+      '+': (a, b) => a + b,
+      '-': (a, b) => a - b,
+      '*': (a, b) => a * b,
+      '/': (a, b) => a / b,
+      '%': (a, b) => a % b,
+      '|': (a, b) => a | b,
+      '^': (a, b) => a ^ b,
+      '&': (a, b) => a & b,
+      '**': (a, b) => a ** b,
+      'in': (a, b) => a in b,
+      'instanceof': (a, b) => a instanceof b
     };
     return operators[operator]?.(evaluate(left, scope), evaluate(right, scope));
   },
@@ -396,7 +390,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
     let $var: Var;
 
     if (node.left.type === "Identifier") {
-      const { name } = node.left;
+      const {name} = node.left;
       const $var_or_not = scope.$find(name);
       if (!$var_or_not) throw `${name} 未定义`;
       $var = $var_or_not;
@@ -428,15 +422,17 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
 
   LogicalExpression: (node: ESTree.LogicalExpression, scope: Scope) => {
+    const left = evaluate(node.left, scope);
+    const right = evaluate(node.right, scope);
     let map: { [key in ESTree.LogicalOperator]: any } = {
-      "||": () => evaluate(node.left, scope) || evaluate(node.right, scope),
-      "&&": () => evaluate(node.left, scope) && evaluate(node.right, scope)
+      "||": () => left || right,
+      "&&": () => left && right
     };
     return map[node.operator]();
   },
 
   MemberExpression: (node: ESTree.MemberExpression, scope: Scope) => {
-    const { object, property, computed } = node;
+    const {object, property, computed} = node;
     if (computed) {
       return evaluate(object, scope)[evaluate(property, scope)];
     } else {
@@ -561,12 +557,11 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
   ArrowFunctionExpression: (node: ESTree.ArrowFunctionExpression, scope: Scope) => {
     if (node.async) {
-      return async function(...args) {
+      return async function (...args) {
         // noinspection DuplicatedCode
-        const new_scope = new Scope("function", scope);
-        new_scope.invasived = true;
+        const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier>node.params[i];
+          const {name} = <ESTree.Identifier>node.params[i];
           new_scope.$declar("const", name, args[i]);
         }
         const result = evaluate(node.body, new_scope);
@@ -581,12 +576,11 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
         }
       };
     } else {
-      return function(...args) {
+      return function (...args) {
         // noinspection DuplicatedCode
-        const new_scope = new Scope("function", scope);
-        new_scope.invasived = true;
+        const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier>node.params[i];
+          const {name} = <ESTree.Identifier>node.params[i];
           new_scope.$declar("const", name, args[i]);
         }
         const result = evaluate(node.body, new_scope);

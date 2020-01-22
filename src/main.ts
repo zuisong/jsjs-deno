@@ -74,7 +74,7 @@ export function run(code: string, append_api: { [key: string]: any } = {}) {
   scope.$declar("var", "exports", $exports);
 
   const program = <ESTree.Node>acorn.parse(code, options);
-  console.log(JSON.stringify(program, null, 2));
+  // console.log(JSON.stringify(program, null, 2));
   evaluate(program, scope);
 
   // exports

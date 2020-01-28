@@ -6,9 +6,8 @@ export function has(obj, propName) {
   return hasOwnProperty.call(obj, propName);
 }
 
-export const isArray =
-  Array.isArray || (obj => toString.call(obj) === "[object Array]");
+export const isArray = Array.isArray || ((obj) => toString.call(obj) === '[object Array]');
 
 export function wordsRegexp(words) {
-  return new RegExp("^(?:" + words.replace(/ /g, "|") + ")$");
+  return new RegExp('^(?:' + words.replace(/ /g, '|') + ')$');
 }

@@ -1,14 +1,14 @@
-import * as acorn from "../acorn/index.js";
-import * as ESTree from "../estree/index.d.ts";
-import evaluate from "./eval.ts";
-import { Scope } from "./scope.ts";
-import { Options } from "../acorn/index.d.ts";
+import * as acorn from '../acorn/index.js';
+import * as ESTree from '../estree/index.d.ts';
+import evaluate from './eval.ts';
+import { Scope } from './scope.ts';
+import { Options } from '../acorn/index.d.ts';
 
 declare const require: (module: string) => any;
 const options: Options = {
   ecmaVersion: 8,
-  sourceType: "script",
-  locations: false
+  sourceType: 'script',
+  locations: false,
 };
 
 declare const Promise: any;
@@ -29,7 +29,7 @@ const default_api: { [key: string]: any } = {
   decodeURIComponent,
   escape,
   unescape,
-
+  Map,
   Infinity,
   NaN,
   isFinite,
@@ -52,33 +52,34 @@ const default_api: { [key: string]: any } = {
   RegExp,
   Array,
   JSON,
-  Promise
+  Promise,
 };
 
 export function run(code: string, append_api: { [key: string]: any } = {}) {
-  const scope = new Scope("block");
-  scope.$declar("const", "this", this);
+  const scope = new Scope('block');
+  scope.$declar('const', 'this', this);
 
   for (const name of Object.getOwnPropertyNames(default_api)) {
-    scope.$declar("const", name, default_api[name]);
+    scope.$declar('const', name, default_api[name]);
   }
 
   for (const name of Object.getOwnPropertyNames(append_api)) {
-    scope.$declar("const", name, append_api[name]);
+    scope.$declar('const', name, append_api[name]);
   }
 
   // 定义 module
   const $exports = {};
   const $module = { exports: $exports };
-  scope.$declar("const", "module", $module);
-  scope.$declar("var", "exports", $exports);
+  scope.$declar('const', 'module', $module);
+  scope.$declar('var', 'exports', $exports);
 
   const program = <ESTree.Node>acorn.parse(code, options);
-  // console.log(JSON.stringify(program, null, 2));
+  const ast = JSON.stringify(program, null, 2);
+  append_api?.save_ast?.(ast);
   evaluate(program, scope);
 
   // exports
-  const exports_var = scope.$find("exports");
+  const exports_var = scope.$find('exports');
   console.log(exports_var);
   return exports_var?.value;
 }

@@ -1,14 +1,9 @@
-import { isIdentifierStart, isIdentifierChar } from "./identifier.js";
-import { types as tt, keywords as keywordTypes } from "./tokentype.js";
-import { Parser } from "./state.js";
-import { SourceLocation } from "./locutil.js";
-import { RegExpValidationState } from "./regexp.js";
-import {
-  lineBreak,
-  lineBreakG,
-  isNewLine,
-  nonASCIIwhitespace
-} from "./whitespace.js";
+import { isIdentifierStart, isIdentifierChar } from './identifier.js';
+import { types as tt, keywords as keywordTypes } from './tokentype.js';
+import { Parser } from './state.js';
+import { SourceLocation } from './locutil.js';
+import { RegExpValidationState } from './regexp.js';
+import { lineBreak, lineBreakG, isNewLine, nonASCIIwhitespace } from './whitespace.js';
 
 // Object type used to represent tokens. Note that normally, tokens
 // simply exist as properties on the parser object. This is only
@@ -20,8 +15,7 @@ export class Token {
     this.value = p.value;
     this.start = p.start;
     this.end = p.end;
-    if (p.options.locations)
-      this.loc = new SourceLocation(p, p.startLoc, p.endLoc);
+    if (p.options.locations) this.loc = new SourceLocation(p, p.startLoc, p.endLoc);
     if (p.options.ranges) this.range = [p.start, p.end];
   }
 }
@@ -34,10 +28,7 @@ const pp = Parser.prototype;
 
 pp.next = function(ignoreEscapeSequenceInKeyword) {
   if (!ignoreEscapeSequenceInKeyword && this.type.keyword && this.containsEsc)
-    this.raiseRecoverable(
-      this.start,
-      "Escape sequence in keyword " + this.type.keyword
-    );
+    this.raiseRecoverable(this.start, 'Escape sequence in keyword ' + this.type.keyword);
   if (this.options.onToken) this.options.onToken(new Token(this));
 
   this.lastTokEnd = this.end;
@@ -53,16 +44,16 @@ pp.getToken = function() {
 };
 
 // If we're in an ES6 environment, make parsers iterable
-if (typeof Symbol !== "undefined")
+if (typeof Symbol !== 'undefined')
   pp[Symbol.iterator] = function() {
     return {
       next: () => {
         let token = this.getToken();
         return {
           done: token.type === tt.eof,
-          value: token
+          value: token,
         };
-      }
+      },
     };
   };
 
@@ -91,11 +82,7 @@ pp.nextToken = function() {
 pp.readToken = function(code) {
   // Identifier or keyword. '\uXXXX' sequences are allowed in
   // identifiers, so '\' also dispatches to that.
-  if (
-    isIdentifierStart(code, this.options.ecmaVersion >= 6) ||
-    code === 92 /* '\' */
-  )
-    return this.readWord();
+  if (isIdentifierStart(code, this.options.ecmaVersion >= 6) || code === 92 /* '\' */) return this.readWord();
 
   return this.getTokenFromCode(code);
 };
@@ -110,8 +97,8 @@ pp.fullCharCodeAtPos = function() {
 pp.skipBlockComment = function() {
   let startLoc = this.options.onComment && this.curPosition();
   let start = this.pos,
-    end = this.input.indexOf("*/", (this.pos += 2));
-  if (end === -1) this.raise(this.pos - 2, "Unterminated comment");
+    end = this.input.indexOf('*/', (this.pos += 2));
+  if (end === -1) this.raise(this.pos - 2, 'Unterminated comment');
   this.pos = end + 2;
   if (this.options.locations) {
     lineBreakG.lastIndex = start;
@@ -122,14 +109,7 @@ pp.skipBlockComment = function() {
     }
   }
   if (this.options.onComment)
-    this.options.onComment(
-      true,
-      this.input.slice(start + 2, end),
-      start,
-      this.pos,
-      startLoc,
-      this.curPosition()
-    );
+    this.options.onComment(true, this.input.slice(start + 2, end), start, this.pos, startLoc, this.curPosition());
 };
 
 pp.skipLineComment = function(startSkip) {
@@ -146,7 +126,7 @@ pp.skipLineComment = function(startSkip) {
       start,
       this.pos,
       startLoc,
-      this.curPosition()
+      this.curPosition(),
     );
 };
 
@@ -187,10 +167,7 @@ pp.skipSpace = function() {
         }
         break;
       default:
-        if (
-          (ch > 8 && ch < 14) ||
-          (ch >= 5760 && nonASCIIwhitespace.test(String.fromCharCode(ch)))
-        ) {
+        if ((ch > 8 && ch < 14) || (ch >= 5760 && nonASCIIwhitespace.test(String.fromCharCode(ch)))) {
           ++this.pos;
         } else {
           break loop;
@@ -268,8 +245,7 @@ pp.readToken_mult_modulo_exp = function(code) {
 pp.readToken_pipe_amp = function(code) {
   // '|&'
   let next = this.input.charCodeAt(this.pos + 1);
-  if (next === code)
-    return this.finishOp(code === 124 ? tt.logicalOR : tt.logicalAND, 2);
+  if (next === code) return this.finishOp(code === 124 ? tt.logicalOR : tt.logicalAND, 2);
   if (next === 61) return this.finishOp(tt.assign, 2);
   return this.finishOp(code === 124 ? tt.bitwiseOR : tt.bitwiseAND, 1);
 };
@@ -289,8 +265,7 @@ pp.readToken_plus_min = function(code) {
       next === 45 &&
       !this.inModule &&
       this.input.charCodeAt(this.pos + 2) === 62 &&
-      (this.lastTokEnd === 0 ||
-        lineBreak.test(this.input.slice(this.lastTokEnd, this.pos)))
+      (this.lastTokEnd === 0 || lineBreak.test(this.input.slice(this.lastTokEnd, this.pos)))
     ) {
       // A `-->` line comment
       this.skipLineComment(3);
@@ -309,8 +284,7 @@ pp.readToken_lt_gt = function(code) {
   let size = 1;
   if (next === code) {
     size = code === 62 && this.input.charCodeAt(this.pos + 2) === 62 ? 3 : 2;
-    if (this.input.charCodeAt(this.pos + size) === 61)
-      return this.finishOp(tt.assign, size + 1);
+    if (this.input.charCodeAt(this.pos + size) === 61) return this.finishOp(tt.assign, size + 1);
     return this.finishOp(tt.bitShift, size);
   }
   if (
@@ -332,11 +306,7 @@ pp.readToken_lt_gt = function(code) {
 pp.readToken_eq_excl = function(code) {
   // '=!'
   let next = this.input.charCodeAt(this.pos + 1);
-  if (next === 61)
-    return this.finishOp(
-      tt.equality,
-      this.input.charCodeAt(this.pos + 2) === 61 ? 3 : 2
-    );
+  if (next === 61) return this.finishOp(tt.equality, this.input.charCodeAt(this.pos + 2) === 61 ? 3 : 2);
   if (code === 61 && next === 62 && this.options.ecmaVersion >= 6) {
     // '=>'
     this.pos += 2;
@@ -450,10 +420,7 @@ pp.getTokenFromCode = function(code) {
       return this.finishOp(tt.prefix, 1);
   }
 
-  this.raise(
-    this.pos,
-    "Unexpected character '" + codePointToString(code) + "'"
-  );
+  this.raise(this.pos, "Unexpected character '" + codePointToString(code) + "'");
 };
 
 pp.finishOp = function(type, size) {
@@ -467,16 +434,14 @@ pp.readRegexp = function() {
     inClass,
     start = this.pos;
   for (;;) {
-    if (this.pos >= this.input.length)
-      this.raise(start, "Unterminated regular expression");
+    if (this.pos >= this.input.length) this.raise(start, 'Unterminated regular expression');
     let ch = this.input.charAt(this.pos);
-    if (lineBreak.test(ch))
-      this.raise(start, "Unterminated regular expression");
+    if (lineBreak.test(ch)) this.raise(start, 'Unterminated regular expression');
     if (!escaped) {
-      if (ch === "[") inClass = true;
-      else if (ch === "]" && inClass) inClass = false;
-      else if (ch === "/" && !inClass) break;
-      escaped = ch === "\\";
+      if (ch === '[') inClass = true;
+      else if (ch === ']' && inClass) inClass = false;
+      else if (ch === '/' && !inClass) break;
+      escaped = ch === '\\';
     } else escaped = false;
     ++this.pos;
   }
@@ -487,8 +452,7 @@ pp.readRegexp = function() {
   if (this.containsEsc) this.unexpected(flagsStart);
 
   // Validate pattern
-  const state =
-    this.regexpState || (this.regexpState = new RegExpValidationState(this));
+  const state = this.regexpState || (this.regexpState = new RegExpValidationState(this));
   state.reset(start, pattern, flags);
   this.validateRegExpFlags(state);
   this.validateRegExpPattern(state);
@@ -526,8 +490,7 @@ pp.readInt = function(radix, len) {
     ++this.pos;
     total = total * radix + val;
   }
-  if (this.pos === start || (len != null && this.pos - start !== len))
-    return null;
+  if (this.pos === start || (len != null && this.pos - start !== len)) return null;
 
   return total;
 };
@@ -536,19 +499,11 @@ pp.readRadixNumber = function(radix) {
   let start = this.pos;
   this.pos += 2; // 0x
   let val = this.readInt(radix);
-  if (val == null)
-    this.raise(this.start + 2, "Expected number in radix " + radix);
-  if (
-    this.options.ecmaVersion >= 11 &&
-    this.input.charCodeAt(this.pos) === 110
-  ) {
-    val =
-      typeof BigInt !== "undefined"
-        ? BigInt(this.input.slice(start, this.pos))
-        : null;
+  if (val == null) this.raise(this.start + 2, 'Expected number in radix ' + radix);
+  if (this.options.ecmaVersion >= 11 && this.input.charCodeAt(this.pos) === 110) {
+    val = typeof BigInt !== 'undefined' ? BigInt(this.input.slice(start, this.pos)) : null;
     ++this.pos;
-  } else if (isIdentifierStart(this.fullCharCodeAtPos()))
-    this.raise(this.pos, "Identifier directly after number");
+  } else if (isIdentifierStart(this.fullCharCodeAtPos())) this.raise(this.pos, 'Identifier directly after number');
   return this.finishToken(tt.num, val);
 };
 
@@ -556,22 +511,15 @@ pp.readRadixNumber = function(radix) {
 
 pp.readNumber = function(startsWithDot) {
   let start = this.pos;
-  if (!startsWithDot && this.readInt(10) === null)
-    this.raise(start, "Invalid number");
+  if (!startsWithDot && this.readInt(10) === null) this.raise(start, 'Invalid number');
   let octal = this.pos - start >= 2 && this.input.charCodeAt(start) === 48;
-  if (octal && this.strict) this.raise(start, "Invalid number");
+  if (octal && this.strict) this.raise(start, 'Invalid number');
   let next = this.input.charCodeAt(this.pos);
-  if (
-    !octal &&
-    !startsWithDot &&
-    this.options.ecmaVersion >= 11 &&
-    next === 110
-  ) {
+  if (!octal && !startsWithDot && this.options.ecmaVersion >= 11 && next === 110) {
     let str = this.input.slice(start, this.pos);
-    let val = typeof BigInt !== "undefined" ? BigInt(str) : null;
+    let val = typeof BigInt !== 'undefined' ? BigInt(str) : null;
     ++this.pos;
-    if (isIdentifierStart(this.fullCharCodeAtPos()))
-      this.raise(this.pos, "Identifier directly after number");
+    if (isIdentifierStart(this.fullCharCodeAtPos())) this.raise(this.pos, 'Identifier directly after number');
     return this.finishToken(tt.num, val);
   }
   if (octal && /[89]/.test(this.input.slice(start, this.pos))) octal = false;
@@ -585,10 +533,9 @@ pp.readNumber = function(startsWithDot) {
     // 'eE'
     next = this.input.charCodeAt(++this.pos);
     if (next === 43 || next === 45) ++this.pos; // '+-'
-    if (this.readInt(10) === null) this.raise(start, "Invalid number");
+    if (this.readInt(10) === null) this.raise(start, 'Invalid number');
   }
-  if (isIdentifierStart(this.fullCharCodeAtPos()))
-    this.raise(this.pos, "Identifier directly after number");
+  if (isIdentifierStart(this.fullCharCodeAtPos())) this.raise(this.pos, 'Identifier directly after number');
 
   let str = this.input.slice(start, this.pos);
   let val = octal ? parseInt(str, 8) : parseFloat(str);
@@ -605,10 +552,9 @@ pp.readCodePoint = function() {
     // '{'
     if (this.options.ecmaVersion < 6) this.unexpected();
     let codePos = ++this.pos;
-    code = this.readHexChar(this.input.indexOf("}", this.pos) - this.pos);
+    code = this.readHexChar(this.input.indexOf('}', this.pos) - this.pos);
     ++this.pos;
-    if (code > 0x10ffff)
-      this.invalidStringToken(codePos, "Code point out of bounds");
+    if (code > 0x10ffff) this.invalidStringToken(codePos, 'Code point out of bounds');
   } else {
     code = this.readHexChar(4);
   }
@@ -623,11 +569,10 @@ function codePointToString(code) {
 }
 
 pp.readString = function(quote) {
-  let out = "",
+  let out = '',
     chunkStart = ++this.pos;
   for (;;) {
-    if (this.pos >= this.input.length)
-      this.raise(this.start, "Unterminated string constant");
+    if (this.pos >= this.input.length) this.raise(this.start, 'Unterminated string constant');
     let ch = this.input.charCodeAt(this.pos);
     if (ch === quote) break;
     if (ch === 92) {
@@ -636,8 +581,7 @@ pp.readString = function(quote) {
       out += this.readEscapedChar(false);
       chunkStart = this.pos;
     } else {
-      if (isNewLine(ch, this.options.ecmaVersion >= 10))
-        this.raise(this.start, "Unterminated string constant");
+      if (isNewLine(ch, this.options.ecmaVersion >= 10)) this.raise(this.start, 'Unterminated string constant');
       ++this.pos;
     }
   }
@@ -673,21 +617,14 @@ pp.invalidStringToken = function(position, message) {
 };
 
 pp.readTmplToken = function() {
-  let out = "",
+  let out = '',
     chunkStart = this.pos;
   for (;;) {
-    if (this.pos >= this.input.length)
-      this.raise(this.start, "Unterminated template");
+    if (this.pos >= this.input.length) this.raise(this.start, 'Unterminated template');
     let ch = this.input.charCodeAt(this.pos);
-    if (
-      ch === 96 ||
-      (ch === 36 && this.input.charCodeAt(this.pos + 1) === 123)
-    ) {
+    if (ch === 96 || (ch === 36 && this.input.charCodeAt(this.pos + 1) === 123)) {
       // '`', '${'
-      if (
-        this.pos === this.start &&
-        (this.type === tt.template || this.type === tt.invalidTemplate)
-      ) {
+      if (this.pos === this.start && (this.type === tt.template || this.type === tt.invalidTemplate)) {
         if (ch === 36) {
           this.pos += 2;
           return this.finishToken(tt.dollarBraceL);
@@ -711,7 +648,7 @@ pp.readTmplToken = function() {
         case 13:
           if (this.input.charCodeAt(this.pos) === 10) ++this.pos;
         case 10:
-          out += "\n";
+          out += '\n';
           break;
         default:
           out += String.fromCharCode(ch);
@@ -732,26 +669,23 @@ pp.readTmplToken = function() {
 pp.readInvalidTemplateToken = function() {
   for (; this.pos < this.input.length; this.pos++) {
     switch (this.input[this.pos]) {
-      case "\\":
+      case '\\':
         ++this.pos;
         break;
 
-      case "$":
-        if (this.input[this.pos + 1] !== "{") {
+      case '$':
+        if (this.input[this.pos + 1] !== '{') {
           break;
         }
       // falls through
 
-      case "`":
-        return this.finishToken(
-          tt.invalidTemplate,
-          this.input.slice(this.start, this.pos)
-        );
+      case '`':
+        return this.finishToken(tt.invalidTemplate, this.input.slice(this.start, this.pos));
 
       // no default
     }
   }
-  this.raise(this.start, "Unterminated template");
+  this.raise(this.start, 'Unterminated template');
 };
 
 // Used to read escaped characters
@@ -761,21 +695,21 @@ pp.readEscapedChar = function(inTemplate) {
   ++this.pos;
   switch (ch) {
     case 110:
-      return "\n"; // 'n' -> '\n'
+      return '\n'; // 'n' -> '\n'
     case 114:
-      return "\r"; // 'r' -> '\r'
+      return '\r'; // 'r' -> '\r'
     case 120:
       return String.fromCharCode(this.readHexChar(2)); // 'x'
     case 117:
       return codePointToString(this.readCodePoint()); // 'u'
     case 116:
-      return "\t"; // 't' -> '\t'
+      return '\t'; // 't' -> '\t'
     case 98:
-      return "\b"; // 'b' -> '\b'
+      return '\b'; // 'b' -> '\b'
     case 118:
-      return "\u000b"; // 'v' -> '\u000b'
+      return '\u000b'; // 'v' -> '\u000b'
     case 102:
-      return "\f"; // 'f' -> '\f'
+      return '\f'; // 'f' -> '\f'
     case 13:
       if (this.input.charCodeAt(this.pos) === 10) ++this.pos; // '\r\n'
     case 10: // ' \n'
@@ -783,16 +717,13 @@ pp.readEscapedChar = function(inTemplate) {
         this.lineStart = this.pos;
         ++this.curLine;
       }
-      return "";
+      return '';
     case 56:
     case 57:
       if (inTemplate) {
         const codePos = this.pos - 1;
 
-        this.invalidStringToken(
-          codePos,
-          "Invalid escape sequence in template string"
-        );
+        this.invalidStringToken(codePos, 'Invalid escape sequence in template string');
 
         return null;
       }
@@ -806,15 +737,10 @@ pp.readEscapedChar = function(inTemplate) {
         }
         this.pos += octalStr.length - 1;
         ch = this.input.charCodeAt(this.pos);
-        if (
-          (octalStr !== "0" || ch === 56 || ch === 57) &&
-          (this.strict || inTemplate)
-        ) {
+        if ((octalStr !== '0' || ch === 56 || ch === 57) && (this.strict || inTemplate)) {
           this.invalidStringToken(
             this.pos - 1 - octalStr.length,
-            inTemplate
-              ? "Octal literal in template string"
-              : "Octal literal in strict mode"
+            inTemplate ? 'Octal literal in template string' : 'Octal literal in strict mode',
           );
         }
         return String.fromCharCode(octal);
@@ -822,7 +748,7 @@ pp.readEscapedChar = function(inTemplate) {
       if (isNewLine(ch)) {
         // Unicode new line characters after \ get removed from output in both
         // template literals and strings
-        return "";
+        return '';
       }
       return String.fromCharCode(ch);
   }
@@ -833,8 +759,7 @@ pp.readEscapedChar = function(inTemplate) {
 pp.readHexChar = function(len) {
   let codePos = this.pos;
   let n = this.readInt(16, len);
-  if (n === null)
-    this.invalidStringToken(codePos, "Bad character escape sequence");
+  if (n === null) this.invalidStringToken(codePos, 'Bad character escape sequence');
   return n;
 };
 
@@ -846,7 +771,7 @@ pp.readHexChar = function(len) {
 
 pp.readWord1 = function() {
   this.containsEsc = false;
-  let word = "",
+  let word = '',
     first = true,
     chunkStart = this.pos;
   let astral = this.options.ecmaVersion >= 6;
@@ -861,14 +786,11 @@ pp.readWord1 = function() {
       let escStart = this.pos;
       if (this.input.charCodeAt(++this.pos) !== 117)
         // "u"
-        this.invalidStringToken(
-          this.pos,
-          "Expecting Unicode escape sequence \\uXXXX"
-        );
+        this.invalidStringToken(this.pos, 'Expecting Unicode escape sequence \\uXXXX');
       ++this.pos;
       let esc = this.readCodePoint();
       if (!(first ? isIdentifierStart : isIdentifierChar)(esc, astral))
-        this.invalidStringToken(escStart, "Invalid Unicode escape");
+        this.invalidStringToken(escStart, 'Invalid Unicode escape');
       word += codePointToString(esc);
       chunkStart = this.pos;
     } else {

@@ -2,14 +2,10 @@
 // line break). Used to count lines.
 
 export const lineBreak = /\r\n?|\n|\u2028|\u2029/;
-export const lineBreakG = new RegExp(lineBreak.source, "g");
+export const lineBreakG = new RegExp(lineBreak.source, 'g');
 
 export function isNewLine(code, ecma2019String) {
-  return (
-    code === 10 ||
-    code === 13 ||
-    (!ecma2019String && (code === 0x2028 || code === 0x2029))
-  );
+  return code === 10 || code === 13 || (!ecma2019String && (code === 0x2028 || code === 0x2029));
 }
 
 export const nonASCIIwhitespace = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/;

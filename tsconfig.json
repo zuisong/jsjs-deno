@@ -1,9 +1,9 @@
 {
-    "compilerOptions": {
-      "plugins": [
-        {
-          "name": "typescript-deno-plugin"
-        }
-      ]
-    }
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "typescript-deno-plugin"
+      }
+    ]
   }
+}

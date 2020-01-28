@@ -1,4 +1,4 @@
-import { Parser } from "./state.js";
+import { Parser } from './state.js';
 import {
   SCOPE_VAR,
   SCOPE_FUNCTION,
@@ -7,8 +7,8 @@ import {
   SCOPE_SIMPLE_CATCH,
   BIND_LEXICAL,
   BIND_SIMPLE_CATCH,
-  BIND_FUNCTION
-} from "./scopeflags.js";
+  BIND_FUNCTION,
+} from './scopeflags.js';
 
 const pp = Parser.prototype;
 
@@ -38,63 +38,45 @@ pp.exitScope = function() {
 // > At the top level of a function, or script, function declarations are
 // > treated like var declarations rather than like lexical declarations.
 pp.treatFunctionsAsVarInScope = function(scope) {
-  return (
-    scope.flags & SCOPE_FUNCTION || (!this.inModule && scope.flags & SCOPE_TOP)
-  );
+  return scope.flags & SCOPE_FUNCTION || (!this.inModule && scope.flags & SCOPE_TOP);
 };
 
 pp.declareName = function(name, bindingType, pos) {
   let redeclared = false;
   if (bindingType === BIND_LEXICAL) {
     const scope = this.currentScope();
-    redeclared =
-      scope.lexical.indexOf(name) > -1 ||
-      scope.functions.indexOf(name) > -1 ||
-      scope.var.indexOf(name) > -1;
+    redeclared = scope.lexical.indexOf(name) > -1 || scope.functions.indexOf(name) > -1 || scope.var.indexOf(name) > -1;
     scope.lexical.push(name);
-    if (this.inModule && scope.flags & SCOPE_TOP)
-      delete this.undefinedExports[name];
+    if (this.inModule && scope.flags & SCOPE_TOP) delete this.undefinedExports[name];
   } else if (bindingType === BIND_SIMPLE_CATCH) {
     const scope = this.currentScope();
     scope.lexical.push(name);
   } else if (bindingType === BIND_FUNCTION) {
     const scope = this.currentScope();
     if (this.treatFunctionsAsVar) redeclared = scope.lexical.indexOf(name) > -1;
-    else
-      redeclared =
-        scope.lexical.indexOf(name) > -1 || scope.var.indexOf(name) > -1;
+    else redeclared = scope.lexical.indexOf(name) > -1 || scope.var.indexOf(name) > -1;
     scope.functions.push(name);
   } else {
     for (let i = this.scopeStack.length - 1; i >= 0; --i) {
       const scope = this.scopeStack[i];
       if (
-        (scope.lexical.indexOf(name) > -1 &&
-          !(scope.flags & SCOPE_SIMPLE_CATCH && scope.lexical[0] === name)) ||
-        (!this.treatFunctionsAsVarInScope(scope) &&
-          scope.functions.indexOf(name) > -1)
+        (scope.lexical.indexOf(name) > -1 && !(scope.flags & SCOPE_SIMPLE_CATCH && scope.lexical[0] === name)) ||
+        (!this.treatFunctionsAsVarInScope(scope) && scope.functions.indexOf(name) > -1)
       ) {
         redeclared = true;
         break;
       }
       scope.var.push(name);
-      if (this.inModule && scope.flags & SCOPE_TOP)
-        delete this.undefinedExports[name];
+      if (this.inModule && scope.flags & SCOPE_TOP) delete this.undefinedExports[name];
       if (scope.flags & SCOPE_VAR) break;
     }
   }
-  if (redeclared)
-    this.raiseRecoverable(
-      pos,
-      `Identifier '${name}' has already been declared`
-    );
+  if (redeclared) this.raiseRecoverable(pos, `Identifier '${name}' has already been declared`);
 };
 
 pp.checkLocalExport = function(id) {
   // scope.functions must be empty as Module code is always strict.
-  if (
-    this.scopeStack[0].lexical.indexOf(id.name) === -1 &&
-    this.scopeStack[0].var.indexOf(id.name) === -1
-  ) {
+  if (this.scopeStack[0].lexical.indexOf(id.name) === -1 && this.scopeStack[0].var.indexOf(id.name) === -1) {
     this.undefinedExports[id.name] = id;
   }
 };

@@ -1,5 +1,5 @@
-import * as ESTree from "../estree/index.d.ts";
-import { Scope } from "./scope.ts";
+import * as ESTree from '../estree/index.d.ts';
+import { Scope } from './scope.ts';
 
 export interface NodeTypeMap {
   Identifier: ESTree.Identifier;
@@ -71,11 +71,7 @@ export interface NodeTypeMap {
 }
 
 export type EvaluateMap = {
-  [key in ESTree.Node["type"]]: (
-    node: NodeTypeMap[key],
-    scope: Scope,
-    arg?: any
-  ) => any;
+  [key in ESTree.Node['type']]: (node: NodeTypeMap[key], scope: Scope, arg?: any) => any;
 };
 
 export type EvaluateFunc = (node: ESTree.Node, scope: Scope, arg?: any) => any;

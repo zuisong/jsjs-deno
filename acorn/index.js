@@ -14,33 +14,24 @@
 //
 // [walk]: util/walk.js
 
-import { Parser } from "./state.js";
-import "./parseutil.js";
-import "./statement.js";
-import "./lval.js";
-import "./expression.js";
-import "./location.js";
-import "./scope.js";
+import { Parser } from './state.js';
+import './parseutil.js';
+import './statement.js';
+import './lval.js';
+import './expression.js';
+import './location.js';
+import './scope.js';
 
-import { defaultOptions } from "./options.js";
-import { Position, SourceLocation, getLineInfo } from "./locutil.js";
-import { Node } from "./node.js";
-import {
-  TokenType,
-  types as tokTypes,
-  keywords as keywordTypes
-} from "./tokentype.js";
-import { TokContext, types as tokContexts } from "./tokencontext.js";
-import { isIdentifierChar, isIdentifierStart } from "./identifier.js";
-import { Token } from "./tokenize.js";
-import {
-  isNewLine,
-  lineBreak,
-  lineBreakG,
-  nonASCIIwhitespace
-} from "./whitespace.js";
+import { defaultOptions } from './options.js';
+import { getLineInfo, Position, SourceLocation } from './locutil.js';
+import { Node } from './node.js';
+import { keywords as keywordTypes, TokenType, types as tokTypes } from './tokentype.js';
+import { TokContext, types as tokContexts } from './tokencontext.js';
+import { isIdentifierChar, isIdentifierStart } from './identifier.js';
+import { Token } from './tokenize.js';
+import { isNewLine, lineBreak, lineBreakG, nonASCIIwhitespace } from './whitespace.js';
 
-export const version = "7.1.0";
+export const version = '7.1.0';
 export {
   Parser,
   defaultOptions,
@@ -59,7 +50,7 @@ export {
   isNewLine,
   lineBreak,
   lineBreakG,
-  nonASCIIwhitespace
+  nonASCIIwhitespace,
 };
 
 Parser.acorn = {
@@ -81,7 +72,7 @@ Parser.acorn = {
   isNewLine,
   lineBreak,
   lineBreakG,
-  nonASCIIwhitespace
+  nonASCIIwhitespace,
 };
 
 // The main exported interface (under `self.acorn` when in the

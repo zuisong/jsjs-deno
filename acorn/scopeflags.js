@@ -10,11 +10,7 @@ export const SCOPE_TOP = 1,
   SCOPE_DIRECT_SUPER = 128;
 
 export function functionFlags(async, generator) {
-  return (
-    SCOPE_FUNCTION |
-    (async ? SCOPE_ASYNC : 0) |
-    (generator ? SCOPE_GENERATOR : 0)
-  );
+  return SCOPE_FUNCTION | (async ? SCOPE_ASYNC : 0) | (generator ? SCOPE_GENERATOR : 0);
 }
 
 // Used in checkLVal and declareName to determine the type of a binding

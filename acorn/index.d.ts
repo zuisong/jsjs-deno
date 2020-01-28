@@ -4,43 +4,22 @@ export = acorn;
 declare namespace acorn {
   function parse(input: string, options?: Options): Node;
 
-  function parseExpressionAt(
-    input: string,
-    pos?: number,
-    options?: Options
-  ): Node;
+  function parseExpressionAt(input: string, pos?: number, options?: Options): Node;
 
   function tokenizer(
     input: string,
-    options?: Options
+    options?: Options,
   ): {
     getToken(): Token;
     [Symbol.iterator](): Iterator<Token>;
   };
 
   interface Options {
-    ecmaVersion?:
-      | 3
-      | 5
-      | 6
-      | 7
-      | 8
-      | 9
-      | 10
-      | 11
-      | 2015
-      | 2016
-      | 2017
-      | 2018
-      | 2019
-      | 2020;
-    sourceType?: "script" | "module";
-    onInsertedSemicolon?: (
-      lastTokEnd: number,
-      lastTokEndLoc?: Position
-    ) => void;
+    ecmaVersion?: 3 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 2015 | 2016 | 2017 | 2018 | 2019 | 2020;
+    sourceType?: 'script' | 'module';
+    onInsertedSemicolon?: (lastTokEnd: number, lastTokEndLoc?: Position) => void;
     onTrailingComma?: (lastTokEnd: number, lastTokEndLoc?: Position) => void;
-    allowReserved?: boolean | "never";
+    allowReserved?: boolean | 'never';
     allowReturnOutsideFunction?: boolean;
     allowImportExportEverywhere?: boolean;
     allowAwaitOutsideFunction?: boolean;
@@ -48,14 +27,7 @@ declare namespace acorn {
     locations?: boolean;
     onToken?: ((token: Token) => any) | Token[];
     onComment?:
-      | ((
-          isBlock: boolean,
-          text: string,
-          start: number,
-          end: number,
-          startLoc?: Position,
-          endLoc?: Position
-        ) => void)
+      | ((isBlock: boolean, text: string, start: number, end: number, startLoc?: Position, endLoc?: Position) => void)
       | Comment[];
     ranges?: boolean;
     program?: Node;
@@ -66,26 +38,23 @@ declare namespace acorn {
 
   class Parser {
     constructor(options: Options, input: string, startPos?: number);
+
     parse(this: Parser): Node;
+
     static parse(this: typeof Parser, input: string, options?: Options): Node;
-    static parseExpressionAt(
-      this: typeof Parser,
-      input: string,
-      pos: number,
-      options?: Options
-    ): Node;
+
+    static parseExpressionAt(this: typeof Parser, input: string, pos: number, options?: Options): Node;
+
     static tokenizer(
       this: typeof Parser,
       input: string,
-      options?: Options
+      options?: Options,
     ): {
       getToken(): Token;
       [Symbol.iterator](): Iterator<Token>;
     };
-    static extend(
-      this: typeof Parser,
-      ...plugins: ((BaseParser: typeof Parser) => typeof Parser)[]
-    ): typeof Parser;
+
+    static extend(this: typeof Parser, ...plugins: ((BaseParser: typeof Parser) => typeof Parser)[]): typeof Parser;
   }
 
   interface Position {
@@ -102,6 +71,7 @@ declare namespace acorn {
     start: Position;
     end: Position;
     source?: string | null;
+
     constructor(p: Parser, start: Position, end: Position);
   }
 
@@ -112,6 +82,7 @@ declare namespace acorn {
     loc?: SourceLocation;
     sourceFile?: string;
     range?: [number, number];
+
     constructor(parser: Parser, pos: number, loc?: SourceLocation);
   }
 
@@ -126,6 +97,7 @@ declare namespace acorn {
     postfix: boolean;
     binop: number;
     updateContext?: (prevType: TokenType) => void;
+
     constructor(label: string, conf?: any);
   }
 
@@ -206,12 +178,7 @@ declare namespace acorn {
   };
 
   class TokContext {
-    constructor(
-      token: string,
-      isExpr: boolean,
-      preserveSpace: boolean,
-      override?: (p: Parser) => void
-    );
+    constructor(token: string, isExpr: boolean, preserveSpace: boolean, override?: (p: Parser) => void);
   }
 
   const tokContexts: {
@@ -246,6 +213,7 @@ declare namespace acorn {
     end: number;
     loc?: SourceLocation;
     range?: [number, number];
+
     constructor(p: Parser);
   }
 

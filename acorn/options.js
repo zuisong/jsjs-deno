@@ -1,5 +1,5 @@
-import { has, isArray } from "./util.js";
-import { SourceLocation } from "./locutil.js";
+import { has, isArray } from './util.js';
+import { SourceLocation } from './locutil.js';
 
 // A second optional argument can be given to further configure
 // the parser process. These options are recognized:
@@ -14,7 +14,7 @@ export const defaultOptions = {
   // `sourceType` indicates the mode the code should be parsed in.
   // Can be either `"script"` or `"module"`. This influences global
   // strict mode and parsing of `import` and `export` declarations.
-  sourceType: "script",
+  sourceType: 'script',
   // `onInsertedSemicolon` can be a callback that will be called
   // when a semicolon is automatically inserted. It will be passed
   // the position of the comma as an offset, and if `locations` is
@@ -86,7 +86,7 @@ export const defaultOptions = {
   directSourceFile: null,
   // When enabled, parenthesized expressions are represented by
   // (non-standard) ParenthesizedExpression nodes
-  preserveParens: false
+  preserveParens: false,
 };
 
 // Interpret and default an options object
@@ -94,20 +94,17 @@ export const defaultOptions = {
 export function getOptions(opts) {
   let options = {};
 
-  for (let opt in defaultOptions)
-    options[opt] = opts && has(opts, opt) ? opts[opt] : defaultOptions[opt];
+  for (let opt in defaultOptions) options[opt] = opts && has(opts, opt) ? opts[opt] : defaultOptions[opt];
 
   if (options.ecmaVersion >= 2015) options.ecmaVersion -= 2009;
 
-  if (options.allowReserved == null)
-    options.allowReserved = options.ecmaVersion < 5;
+  if (options.allowReserved == null) options.allowReserved = options.ecmaVersion < 5;
 
   if (isArray(options.onToken)) {
     let tokens = options.onToken;
-    options.onToken = token => tokens.push(token);
+    options.onToken = (token) => tokens.push(token);
   }
-  if (isArray(options.onComment))
-    options.onComment = pushComment(options, options.onComment);
+  if (isArray(options.onComment)) options.onComment = pushComment(options, options.onComment);
 
   return options;
 }
@@ -115,13 +112,12 @@ export function getOptions(opts) {
 function pushComment(options, array) {
   return function(block, text, start, end, startLoc, endLoc) {
     let comment = {
-      type: block ? "Block" : "Line",
+      type: block ? 'Block' : 'Line',
       value: text,
       start: start,
-      end: end
+      end: end,
     };
-    if (options.locations)
-      comment.loc = new SourceLocation(this, startLoc, endLoc);
+    if (options.locations) comment.loc = new SourceLocation(this, startLoc, endLoc);
     if (options.ranges) comment.range = [start, end];
     array.push(comment);
   };

@@ -1,5 +1,4 @@
-import * as interpreter from "../src/main.ts";
-
+import * as interpreter from '../src/main.ts';
 
 // language=JavaScript
 let code = `
@@ -22,8 +21,8 @@ let code = `
   }
 
 `;
-let {test} = interpreter.run(code);
+let { test } = interpreter.run(code);
 console.log(code);
 
-console.log("=========================")
-test()
+console.log('=========================');
+test();

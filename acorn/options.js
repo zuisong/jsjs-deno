@@ -1,5 +1,5 @@
-import {has, isArray} from "./util.js"
-import {SourceLocation} from "./locutil.js"
+import { has, isArray } from "./util.js";
+import { SourceLocation } from "./locutil.js";
 
 // A second optional argument can be given to further configure
 // the parser process. These options are recognized:
@@ -87,30 +87,29 @@ export const defaultOptions = {
   // When enabled, parenthesized expressions are represented by
   // (non-standard) ParenthesizedExpression nodes
   preserveParens: false
-}
+};
 
 // Interpret and default an options object
 
 export function getOptions(opts) {
-  let options = {}
+  let options = {};
 
   for (let opt in defaultOptions)
-    options[opt] = opts && has(opts, opt) ? opts[opt] : defaultOptions[opt]
+    options[opt] = opts && has(opts, opt) ? opts[opt] : defaultOptions[opt];
 
-  if (options.ecmaVersion >= 2015)
-    options.ecmaVersion -= 2009
+  if (options.ecmaVersion >= 2015) options.ecmaVersion -= 2009;
 
   if (options.allowReserved == null)
-    options.allowReserved = options.ecmaVersion < 5
+    options.allowReserved = options.ecmaVersion < 5;
 
   if (isArray(options.onToken)) {
-    let tokens = options.onToken
-    options.onToken = (token) => tokens.push(token)
+    let tokens = options.onToken;
+    options.onToken = token => tokens.push(token);
   }
   if (isArray(options.onComment))
-    options.onComment = pushComment(options, options.onComment)
+    options.onComment = pushComment(options, options.onComment);
 
-  return options
+  return options;
 }
 
 function pushComment(options, array) {
@@ -120,11 +119,10 @@ function pushComment(options, array) {
       value: text,
       start: start,
       end: end
-    }
+    };
     if (options.locations)
-      comment.loc = new SourceLocation(this, startLoc, endLoc)
-    if (options.ranges)
-      comment.range = [start, end]
-    array.push(comment)
-  }
+      comment.loc = new SourceLocation(this, startLoc, endLoc);
+    if (options.ranges) comment.range = [start, end];
+    array.push(comment);
+  };
 }

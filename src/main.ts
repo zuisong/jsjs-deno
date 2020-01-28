@@ -1,8 +1,8 @@
 import * as acorn from "../acorn/index.js";
 import * as ESTree from "../estree/index.d.ts";
 import evaluate from "./eval.ts";
-import {Scope} from "./scope.ts";
-import {Options} from "../acorn/index.d.ts";
+import { Scope } from "./scope.ts";
+import { Options } from "../acorn/index.d.ts";
 
 declare const require: (module: string) => any;
 const options: Options = {
@@ -69,7 +69,7 @@ export function run(code: string, append_api: { [key: string]: any } = {}) {
 
   // 定义 module
   const $exports = {};
-  const $module = {exports: $exports};
+  const $module = { exports: $exports };
   scope.$declar("const", "module", $module);
   scope.$declar("var", "exports", $exports);
 
@@ -79,6 +79,6 @@ export function run(code: string, append_api: { [key: string]: any } = {}) {
 
   // exports
   const exports_var = scope.$find("exports");
-  console.log(exports_var)
+  console.log(exports_var);
   return exports_var?.value;
 }

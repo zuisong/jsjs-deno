@@ -1,7 +1,7 @@
-import {Parser} from "./state.js"
-import {Position, getLineInfo} from "./locutil.js"
+import { Parser } from "./state.js";
+import { Position, getLineInfo } from "./locutil.js";
 
-const pp = Parser.prototype
+const pp = Parser.prototype;
 
 // This function is used to raise exceptions on parse errors. It
 // takes an offset integer (into the current `input`) to indicate
@@ -10,17 +10,19 @@ const pp = Parser.prototype
 // message.
 
 pp.raise = function(pos, message) {
-  let loc = getLineInfo(this.input, pos)
-  message += " (" + loc.line + ":" + loc.column + ")"
-  let err = new SyntaxError(message)
-  err.pos = pos; err.loc = loc; err.raisedAt = this.pos
-  throw err
-}
+  let loc = getLineInfo(this.input, pos);
+  message += " (" + loc.line + ":" + loc.column + ")";
+  let err = new SyntaxError(message);
+  err.pos = pos;
+  err.loc = loc;
+  err.raisedAt = this.pos;
+  throw err;
+};
 
-pp.raiseRecoverable = pp.raise
+pp.raiseRecoverable = pp.raise;
 
 pp.curPosition = function() {
   if (this.options.locations) {
-    return new Position(this.curLine, this.pos - this.lineStart)
+    return new Position(this.curLine, this.pos - this.lineStart);
   }
-}
+};

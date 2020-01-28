@@ -36,10 +36,26 @@ interface BaseNode extends BaseNodeWithoutComments {
 }
 
 export type Node =
-    Identifier | Literal | Program | Function | SwitchCase | CatchClause |
-    VariableDeclarator | Statement | Expression | Property |
-    AssignmentProperty | Super | TemplateElement | SpreadElement | Pattern |
-    ClassBody | Class | MethodDefinition | ModuleDeclaration | ModuleSpecifier;
+  | Identifier
+  | Literal
+  | Program
+  | Function
+  | SwitchCase
+  | CatchClause
+  | VariableDeclarator
+  | Statement
+  | Expression
+  | Property
+  | AssignmentProperty
+  | Super
+  | TemplateElement
+  | SpreadElement
+  | Pattern
+  | ClassBody
+  | Class
+  | MethodDefinition
+  | ModuleDeclaration
+  | ModuleSpecifier;
 
 export interface Comment extends BaseNodeWithoutComments {
   type: "Line" | "Block";
@@ -83,16 +99,32 @@ interface BaseFunction extends BaseNode {
 }
 
 export type Function =
-    FunctionDeclaration | FunctionExpression | ArrowFunctionExpression;
+  | FunctionDeclaration
+  | FunctionExpression
+  | ArrowFunctionExpression;
 
 export type Statement =
-    ExpressionStatement | BlockStatement | EmptyStatement |
-    DebuggerStatement | WithStatement | ReturnStatement | LabeledStatement |
-    BreakStatement | ContinueStatement | IfStatement | SwitchStatement |
-    ThrowStatement | TryStatement | WhileStatement | DoWhileStatement |
-    ForStatement | ForInStatement | ForOfStatement | Declaration;
+  | ExpressionStatement
+  | BlockStatement
+  | EmptyStatement
+  | DebuggerStatement
+  | WithStatement
+  | ReturnStatement
+  | LabeledStatement
+  | BreakStatement
+  | ContinueStatement
+  | IfStatement
+  | SwitchStatement
+  | ThrowStatement
+  | TryStatement
+  | WhileStatement
+  | DoWhileStatement
+  | ForStatement
+  | ForInStatement
+  | ForOfStatement
+  | Declaration;
 
-interface BaseStatement extends BaseNode { }
+interface BaseStatement extends BaseNode {}
 
 export interface EmptyStatement extends BaseStatement {
   type: "EmptyStatement";
@@ -196,9 +228,11 @@ export interface DebuggerStatement extends BaseStatement {
 }
 
 export type Declaration =
-      FunctionDeclaration | VariableDeclaration | ClassDeclaration;
+  | FunctionDeclaration
+  | VariableDeclaration
+  | ClassDeclaration;
 
-interface BaseDeclaration extends BaseStatement { }
+interface BaseDeclaration extends BaseStatement {}
 
 export interface FunctionDeclaration extends BaseFunction, BaseDeclaration {
   type: "FunctionDeclaration";
@@ -220,15 +254,31 @@ export interface VariableDeclarator extends BaseNode {
 }
 
 type Expression =
-    ThisExpression | ArrayExpression | ObjectExpression | FunctionExpression |
-    ArrowFunctionExpression | YieldExpression | Literal | UnaryExpression |
-    UpdateExpression | BinaryExpression | AssignmentExpression |
-    LogicalExpression | MemberExpression | ConditionalExpression |
-    CallExpression | NewExpression | SequenceExpression | TemplateLiteral |
-    TaggedTemplateExpression | ClassExpression | MetaProperty | Identifier |
-    AwaitExpression;
+  | ThisExpression
+  | ArrayExpression
+  | ObjectExpression
+  | FunctionExpression
+  | ArrowFunctionExpression
+  | YieldExpression
+  | Literal
+  | UnaryExpression
+  | UpdateExpression
+  | BinaryExpression
+  | AssignmentExpression
+  | LogicalExpression
+  | MemberExpression
+  | ConditionalExpression
+  | CallExpression
+  | NewExpression
+  | SequenceExpression
+  | TemplateLiteral
+  | TaggedTemplateExpression
+  | ClassExpression
+  | MetaProperty
+  | Identifier
+  | AwaitExpression;
 
-export interface BaseExpression extends BaseNode { }
+export interface BaseExpression extends BaseNode {}
 
 export interface ThisExpression extends BaseExpression {
   type: "ThisExpression";
@@ -329,10 +379,14 @@ export interface MemberExpression extends BaseExpression, BasePattern {
 }
 
 export type Pattern =
-    Identifier | ObjectPattern | ArrayPattern | RestElement |
-    AssignmentPattern | MemberExpression;
+  | Identifier
+  | ObjectPattern
+  | ArrayPattern
+  | RestElement
+  | AssignmentPattern
+  | MemberExpression;
 
-interface BasePattern extends BaseNode { }
+interface BasePattern extends BaseNode {}
 
 export interface SwitchCase extends BaseNode {
   type: "SwitchCase";
@@ -370,18 +424,54 @@ export interface RegExpLiteral extends BaseNode, BaseExpression {
 }
 
 export type UnaryOperator =
-    "-" | "+" | "!" | "~" | "typeof" | "void" | "delete";
+  | "-"
+  | "+"
+  | "!"
+  | "~"
+  | "typeof"
+  | "void"
+  | "delete";
 
 export type BinaryOperator =
-    "==" | "!=" | "===" | "!==" | "<" | "<=" | ">" | ">=" | "<<" |
-    ">>" | ">>>" | "+" | "-" | "*" | "/" | "%" | "**" | "|" | "^" | "&" | "in" |
-    "instanceof";
+  | "=="
+  | "!="
+  | "==="
+  | "!=="
+  | "<"
+  | "<="
+  | ">"
+  | ">="
+  | "<<"
+  | ">>"
+  | ">>>"
+  | "+"
+  | "-"
+  | "*"
+  | "/"
+  | "%"
+  | "**"
+  | "|"
+  | "^"
+  | "&"
+  | "in"
+  | "instanceof";
 
 export type LogicalOperator = "||" | "&&";
 
 export type AssignmentOperator =
-    "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "<<=" | ">>=" | ">>>=" |
-    "|=" | "^=" | "&=";
+  | "="
+  | "+="
+  | "-="
+  | "*="
+  | "/="
+  | "%="
+  | "**="
+  | "<<="
+  | ">>="
+  | ">>>="
+  | "|="
+  | "^="
+  | "&=";
 
 export type UpdateOperator = "++" | "--";
 
@@ -496,20 +586,26 @@ export interface MetaProperty extends BaseExpression {
 }
 
 export type ModuleDeclaration =
-    ImportDeclaration | ExportNamedDeclaration | ExportDefaultDeclaration |
-    ExportAllDeclaration;
-interface BaseModuleDeclaration extends BaseNode { }
+  | ImportDeclaration
+  | ExportNamedDeclaration
+  | ExportDefaultDeclaration
+  | ExportAllDeclaration;
+interface BaseModuleDeclaration extends BaseNode {}
 
 export type ModuleSpecifier =
-    ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier |
-    ExportSpecifier;
+  | ImportSpecifier
+  | ImportDefaultSpecifier
+  | ImportNamespaceSpecifier
+  | ExportSpecifier;
 interface BaseModuleSpecifier extends BaseNode {
   local: Identifier;
 }
 
 export interface ImportDeclaration extends BaseModuleDeclaration {
   type: "ImportDeclaration";
-  specifiers: Array<ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier>;
+  specifiers: Array<
+    ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier
+  >;
   source: Literal;
 }
 

@@ -65,7 +65,12 @@ export class Scope {
   private readonly parent: Scope | null;
   private readonly prefix: string = "@";
 
-  constructor(type: ScopeType, parent?: Scope, invasive = false, label?: string) {
+  constructor(
+    type: ScopeType,
+    parent?: Scope,
+    invasive = false,
+    label?: string
+  ) {
     this.type = type;
     this.parent = parent || null;
     this.content = {};
@@ -83,7 +88,11 @@ export class Scope {
     }
   }
 
-  private $declar_(raw_name: string, value: any, type: "let" | "const"): boolean {
+  private $declar_(
+    raw_name: string,
+    value: any,
+    type: "let" | "const"
+  ): boolean {
     const name: string = this.prefix + raw_name;
     const $var = this.content.hasOwnProperty(name);
     if (!$var) {

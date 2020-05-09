@@ -1,5 +1,4 @@
 import { run } from "../src/main.ts";
-
 let r1 = /\s/;
 
 console.log(r1.test("\r"));

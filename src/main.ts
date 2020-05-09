@@ -1,19 +1,16 @@
+import { ESTree, babelParser, babelType } from "../deps.ts";
 import evaluate from "./eval.ts";
 import { Scope } from "./scope.ts";
-import { acorn } from "../deps.ts";
-import * as ESTree from "../types/estree.d.ts";
-
 declare const require: (module: string) => any;
-const options: acorn.Options = {
-  ecmaVersion: 8,
+const options = {
   sourceType: "script",
-  locations: false,
-};
-
-declare const Promise: any;
+  plugins: ["estree"],
+} as babelParser.ParserOptions;
 
 // 导出默认对象
 const default_api: { [key: string]: any } = {
+  ...window,
+
   console,
 
   setTimeout,
@@ -47,16 +44,19 @@ const default_api: { [key: string]: any } = {
   Number,
   Math,
   Date,
-  String,
-  RegExp,
   Array,
   JSON,
+  String,
+  RegExp,
   Promise,
 };
 
-export function run(code: string, append_api: { [key: string]: any } = {}) {
+export function run(
+  this: any,
+  code: string,
+  append_api: { [key: string]: any } = {},
+) {
   const scope = new Scope("block");
-  //@ts-ignore
   scope.$declar("const", "this", this);
 
   for (const name of Object.getOwnPropertyNames(default_api)) {
@@ -73,10 +73,10 @@ export function run(code: string, append_api: { [key: string]: any } = {}) {
   scope.$declar("const", "module", $module);
   scope.$declar("var", "exports", $exports);
 
-  const program = <ESTree.Node> acorn.parse(code, options);
+  const program = babelParser.parse(code, options).program;
   const ast = JSON.stringify(program, null, 2);
   append_api?.save_ast?.(ast);
-  evaluate(program, scope);
+  evaluate(program as any, scope);
 
   // exports
   const exports_var = scope.$find("exports");

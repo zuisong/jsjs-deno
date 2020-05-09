@@ -1,7 +1,6 @@
 import { EvaluateFunc } from "./type.ts";
 import { PropVar, Scope, Var } from "./scope.ts";
-
-import * as ESTree from "../types/estree.d.ts";
+import { ESTree } from "../deps.ts";
 
 const BREAK_SINGAL: {} = {};
 const CONTINUE_SINGAL: {} = {};
@@ -252,34 +251,36 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
 
   ArrayExpression: (node: ESTree.ArrayExpression, scope: Scope) => {
+    //@ts-ignore
     return node.elements.map((item) => evaluate(item, scope));
   },
 
   ObjectExpression: (node: ESTree.ObjectExpression, scope: Scope) => {
-    const object = {};
+    const object: any = {};
     for (const property1 of node.properties) {
-      const property = property1 as ESTree.Property;
-      const kind = property.kind;
+      if (true) {
+        let property = property1 as ESTree.Property;
+        const kind = property.kind;
 
-      let key;
-      if (property.key.type === "Literal") {
-        key = evaluate(property.key, scope);
-      } else if (property.key.type === "Identifier") {
-        key = property.key.name;
-      } else {
-        throw "这里绝对就错了";
-      }
+        let key: string;
+        if (property.key.type === "Literal") {
+          key = evaluate(property.key, scope);
+        } else if (property.key.type === "Identifier") {
+          key = property.key.name;
+        } else {
+          throw "这里绝对就错了1";
+        }
 
-      const value = evaluate(property.value, scope);
-      if (kind === "init") {
-        //@ts-ignore
-        object[key] = value;
-      } else if (kind === "set") {
-        Object.defineProperty(object, key, { set: value });
-      } else if (kind === "get") {
-        Object.defineProperty(object, key, { get: value });
-      } else {
-        throw "这里绝对就错了";
+        const value = evaluate(property.value, scope);
+        if (kind === "init") {
+          object[key] = value;
+        } else if (kind === "set") {
+          Object.defineProperty(object, key, { set: value });
+        } else if (kind === "get") {
+          Object.defineProperty(object, key, { get: value });
+        } else {
+          throw "这里绝对就错了2";
+        }
       }
     }
     return object;
@@ -320,6 +321,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
 
   UnaryExpression: (node: ESTree.UnaryExpression, scope: Scope) => {
+    //@ts-ignore
     return {
       "-": () => -evaluate(node.argument, scope),
       "+": () => +evaluate(node.argument, scope),
@@ -359,8 +361,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
     let $var: Var;
     if (node.argument.type === "Identifier") {
       const { name } = node.argument;
-      //@ts-ignore
-      $var = scope.$find(name);
+      $var = scope.$find(name)!!;
       if (!$var) throw `${name} 未定义`;
     } else if (node.argument.type === "MemberExpression") {
       const argument = node.argument;
@@ -371,6 +372,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
       $var = new PropVar(object, property);
     }
 
+    //@ts-ignore
     return {
       "--": (v: number) => {
         $var.value = v - 1;
@@ -479,6 +481,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
 
   CallExpression: (node: ESTree.CallExpression, scope: Scope) => {
     const func = evaluate(node.callee, scope);
+    //@ts-ignore
     const args = node.arguments.map((arg) => evaluate(arg, scope));
 
     // 心疼自己
@@ -493,6 +496,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
 
   NewExpression: (node: ESTree.NewExpression, scope: Scope) => {
     const func = evaluate(node.callee, scope);
+    //@ts-ignore
     const args = node.arguments.map((arg) => evaluate(arg, scope));
     return new (func.bind.apply(func, [null].concat(args)))();
   },

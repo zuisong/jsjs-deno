@@ -1,13 +1,16 @@
-import * as ESTree from '../estree/index.d.ts';
+import { EvaluateFunc } from "./type.ts";
+import { PropVar, Scope, Var } from "./scope.ts";
 
-import { EvaluateFunc } from './type.ts';
-import { PropVar, Scope, Var } from './scope.ts';
+import * as ESTree from "../types/estree.d.ts";
 
 const BREAK_SINGAL: {} = {};
 const CONTINUE_SINGAL: {} = {};
 const RETURN_SINGAL: { result: any } = { result: undefined };
 
-const evaluate_map: { [key in ESTree.Node['type']]: any } = {
+const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
+  ImportExpression: (node: ESTree.ImportExpression, scope: Scope) => {
+    throw `${node.type} 未实现`;
+  },
   Program: (program: ESTree.Program, scope: Scope) => {
     let result = undefined;
     for (const node of program.body) {
@@ -17,7 +20,7 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   },
 
   Identifier: (node: ESTree.Identifier, scope: Scope) => {
-    if (node.name === 'undefined') {
+    if (node.name === "undefined") {
       return undefined;
     } // 奇怪的问题
     const $var = scope.$find(node.name);
@@ -35,10 +38,13 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   },
 
   BlockStatement: (block: ESTree.BlockStatement, scope: Scope) => {
-    let new_scope = scope.invasive ? scope : new Scope('block', scope);
+    let new_scope = scope.invasive ? scope : new Scope("block", scope);
     for (const node of block.body) {
       const result = evaluate(node, new_scope);
-      if (result === BREAK_SINGAL || result === CONTINUE_SINGAL || result === RETURN_SINGAL) {
+      if (
+        result === BREAK_SINGAL || result === CONTINUE_SINGAL ||
+        result === RETURN_SINGAL
+      ) {
         return result;
       }
     }
@@ -57,7 +63,9 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   },
 
   ReturnStatement: (node: ESTree.ReturnStatement, scope: Scope) => {
-    RETURN_SINGAL.result = node.argument ? evaluate(node.argument, scope) : undefined;
+    RETURN_SINGAL.result = node.argument
+      ? evaluate(node.argument, scope)
+      : undefined;
     return RETURN_SINGAL;
   },
 
@@ -80,12 +88,15 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
 
   SwitchStatement: (node: ESTree.SwitchStatement, scope: Scope) => {
     const discriminant = evaluate(node.discriminant, scope);
-    const new_scope = new Scope('switch', scope);
+    const new_scope = new Scope("switch", scope);
 
     let matched = false;
     for (const $case of node.cases) {
       // 进行匹配相应的 case
-      if (!matched && (!$case.test || discriminant === evaluate($case.test, new_scope))) {
+      if (
+        !matched &&
+        (!$case.test || discriminant === evaluate($case.test, new_scope))
+      ) {
         matched = true;
       }
 
@@ -104,14 +115,17 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   SwitchCase: (node: ESTree.SwitchCase, scope: Scope) => {
     for (const stmt of node.consequent) {
       const result = evaluate(stmt, scope);
-      if (result === BREAK_SINGAL || result === CONTINUE_SINGAL || result === RETURN_SINGAL) {
+      if (
+        result === BREAK_SINGAL || result === CONTINUE_SINGAL ||
+        result === RETURN_SINGAL
+      ) {
         return result;
       }
     }
   },
 
   WithStatement: (node: ESTree.WithStatement, scope: Scope) => {
-    throw '因为 with 很多问题，已经被基本弃用了，不实现';
+    throw "因为 with 很多问题，已经被基本弃用了，不实现";
   },
 
   ThrowStatement: (node: ESTree.ThrowStatement, scope: Scope) => {
@@ -123,9 +137,9 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
       return evaluate(node.block, scope);
     } catch (err) {
       if (node.handler) {
-        const param = <ESTree.Identifier>node.handler.param;
-        const new_scope = new Scope('block', scope, true);
-        new_scope.$declar('const', param.name, err);
+        const param = <ESTree.Identifier> node.handler.param;
+        const new_scope = new Scope("block", scope, true);
+        new_scope.$declar("const", param.name, err);
         return evaluate(node.handler, new_scope);
       } else {
         throw err;
@@ -143,7 +157,7 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
 
   WhileStatement: (node: ESTree.WhileStatement, scope: Scope) => {
     while (evaluate(node.test, scope)) {
-      const new_scope = new Scope('loop', scope, true);
+      const new_scope = new Scope("loop", scope, true);
       const result = evaluate(node.body, new_scope);
 
       if (result === BREAK_SINGAL) {
@@ -158,7 +172,7 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
 
   DoWhileStatement: (node: ESTree.DoWhileStatement, scope: Scope) => {
     do {
-      const new_scope = new Scope('loop', scope, true);
+      const new_scope = new Scope("loop", scope, true);
       const result = evaluate(node.body, new_scope);
       if (result === BREAK_SINGAL) {
         break;
@@ -172,7 +186,8 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
 
   ForStatement: (node: ESTree.ForStatement, scope: Scope) => {
     for (
-      const new_scope = new Scope('loop', scope), init_val = node.init ? evaluate(node.init, new_scope) : null;
+      const new_scope = new Scope("loop", scope),
+        init_val = node.init ? evaluate(node.init, new_scope) : null;
       node.test ? evaluate(node.test, new_scope) : true;
       node.update ? evaluate(node.update, new_scope) : void 0
     ) {
@@ -188,12 +203,12 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   },
 
   ForInStatement: (node: ESTree.ForInStatement, scope: Scope) => {
-    const kind = (<ESTree.VariableDeclaration>node.left).kind;
-    const decl = (<ESTree.VariableDeclaration>node.left).declarations[0];
-    const name = (<ESTree.Identifier>decl.id).name;
+    const kind = (<ESTree.VariableDeclaration> node.left).kind;
+    const decl = (<ESTree.VariableDeclaration> node.left).declarations[0];
+    const name = (<ESTree.Identifier> decl.id).name;
 
     for (const value in evaluate(node.right, scope)) {
-      const new_scope = new Scope('loop', scope, true);
+      const new_scope = new Scope("loop", scope, true);
       scope.$declar(kind, name, value);
       const result = evaluate(node.body, new_scope);
       if (result === BREAK_SINGAL) {
@@ -207,9 +222,9 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   },
 
   FunctionDeclaration: (node: ESTree.FunctionDeclaration, scope: Scope) => {
-    const func = evaluate_map['FunctionExpression'](<any>node, scope);
+    const func = evaluate_map["FunctionExpression"](<any> node, scope);
     const { name: func_name } = node.id!!;
-    if (!scope.$declar('const', func_name, func)) {
+    if (!scope.$declar("const", func_name, func)) {
       throw `[Error] ${func_name} 重复定义`;
     }
   },
@@ -217,8 +232,10 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   VariableDeclaration: (node: ESTree.VariableDeclaration, scope: Scope) => {
     const kind = node.kind;
     for (const declartor of node.declarations) {
-      const { name } = <ESTree.Identifier>declartor.id;
-      const value = declartor.init ? evaluate(declartor.init, scope) : undefined;
+      const { name } = <ESTree.Identifier> declartor.id;
+      const value = declartor.init
+        ? evaluate(declartor.init, scope)
+        : undefined;
       if (!scope.$declar(kind, name, value)) {
         throw `[Error] ${name} 重复定义`;
       }
@@ -226,11 +243,11 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   },
 
   VariableDeclarator: (node: ESTree.VariableDeclarator, scope: Scope) => {
-    throw '执行这里就错了';
+    throw "执行这里就错了";
   },
 
   ThisExpression: (node: ESTree.ThisExpression, scope: Scope) => {
-    const this_val = scope.$find('this');
+    const this_val = scope.$find("this");
     return this_val?.value;
   },
 
@@ -240,27 +257,29 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
 
   ObjectExpression: (node: ESTree.ObjectExpression, scope: Scope) => {
     const object = {};
-    for (const property of node.properties) {
+    for (const property1 of node.properties) {
+      const property = property1 as ESTree.Property;
       const kind = property.kind;
 
       let key;
-      if (property.key.type === 'Literal') {
+      if (property.key.type === "Literal") {
         key = evaluate(property.key, scope);
-      } else if (property.key.type === 'Identifier') {
+      } else if (property.key.type === "Identifier") {
         key = property.key.name;
       } else {
-        throw '这里绝对就错了';
+        throw "这里绝对就错了";
       }
 
       const value = evaluate(property.value, scope);
-      if (kind === 'init') {
+      if (kind === "init") {
+        //@ts-ignore
         object[key] = value;
-      } else if (kind === 'set') {
+      } else if (kind === "set") {
         Object.defineProperty(object, key, { set: value });
-      } else if (kind === 'get') {
+      } else if (kind === "get") {
         Object.defineProperty(object, key, { get: value });
       } else {
-        throw '这里绝对就错了';
+        throw "这里绝对就错了";
       }
     }
     return object;
@@ -268,28 +287,30 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
 
   FunctionExpression: (node: ESTree.FunctionExpression, scope: Scope) => {
     if (node.async) {
-      return async function(...args) {
-        const new_scope = new Scope('function', scope, true);
+      return async function (...args: any[]) {
+        const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier>node.params[i];
-          new_scope.$declar('const', name, args[i]);
+          const { name } = <ESTree.Identifier> node.params[i];
+          new_scope.$declar("const", name, args[i]);
         }
-        new_scope.$declar('const', 'this', this);
-        new_scope.$declar('const', 'arguments', arguments);
+        //@ts-ignore
+        new_scope.$declar("const", "this", this);
+        new_scope.$declar("const", "arguments", arguments);
         const result = evaluate(node.body, new_scope);
         if (result === RETURN_SINGAL) {
           return result.result;
         }
       };
     } else {
-      return function(...args) {
-        const new_scope = new Scope('function', scope, true);
+      return function (...args: any[]) {
+        const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier>node.params[i];
-          new_scope.$declar('const', name, args[i]);
+          const { name } = <ESTree.Identifier> node.params[i];
+          new_scope.$declar("const", name, args[i]);
         }
-        new_scope.$declar('const', 'this', this);
-        new_scope.$declar('const', 'arguments', arguments);
+        //@ts-ignore
+        new_scope.$declar("const", "this", this);
+        new_scope.$declar("const", "arguments", arguments);
         const result = evaluate(node.body, new_scope);
         if (result === RETURN_SINGAL) {
           return result.result;
@@ -300,13 +321,13 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
 
   UnaryExpression: (node: ESTree.UnaryExpression, scope: Scope) => {
     return {
-      '-': () => -evaluate(node.argument, scope),
-      '+': () => +evaluate(node.argument, scope),
-      '!': () => !evaluate(node.argument, scope),
-      '~': () => ~evaluate(node.argument, scope),
+      "-": () => -evaluate(node.argument, scope),
+      "+": () => +evaluate(node.argument, scope),
+      "!": () => !evaluate(node.argument, scope),
+      "~": () => ~evaluate(node.argument, scope),
       void: () => void evaluate(node.argument, scope),
       typeof: () => {
-        if (node.argument.type === 'Identifier') {
+        if (node.argument.type === "Identifier") {
           const $var = scope.$find(node.argument.name);
           return typeof $var?.value;
         } else {
@@ -315,15 +336,18 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
       },
       delete: () => {
         // delete 是真麻烦
-        if (node.argument.type === 'MemberExpression') {
+        if (node.argument.type === "MemberExpression") {
           const { object, property, computed } = node.argument;
           if (computed) {
             return delete evaluate(object, scope)[evaluate(property, scope)];
           } else {
-            return delete evaluate(object, scope)[(<ESTree.Identifier>property).name];
+            return delete evaluate(
+              object,
+              scope,
+            )[(<ESTree.Identifier> property).name];
           }
-        } else if (node.argument.type === 'Identifier') {
-          const $this = scope.$find('this');
+        } else if (node.argument.type === "Identifier") {
+          const $this = scope.$find("this");
           if ($this) return $this.value[node.argument.name];
         }
       },
@@ -333,53 +357,58 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   UpdateExpression: (node: ESTree.UpdateExpression, scope: Scope) => {
     const { prefix } = node;
     let $var: Var;
-    if (node.argument.type === 'Identifier') {
+    if (node.argument.type === "Identifier") {
       const { name } = node.argument;
+      //@ts-ignore
       $var = scope.$find(name);
       if (!$var) throw `${name} 未定义`;
-    } else if (node.argument.type === 'MemberExpression') {
+    } else if (node.argument.type === "MemberExpression") {
       const argument = node.argument;
       const object = evaluate(argument.object, scope);
       let property = argument.computed
         ? evaluate(argument.property, scope)
-        : (<ESTree.Identifier>argument.property).name;
+        : (<ESTree.Identifier> argument.property).name;
       $var = new PropVar(object, property);
     }
 
     return {
-      '--': (v) => {
+      "--": (v: number) => {
         $var.value = v - 1;
         prefix ? --v : v--;
       },
-      '++': (v) => {
+      "++": (v: number) => {
         $var.value = v + 1;
         prefix ? ++v : v++;
       },
     }[node.operator](evaluate(node.argument, scope));
   },
 
-  BinaryExpression: ({ left, operator, right }: ESTree.BinaryExpression, scope: Scope) => {
-    let operators: { [key in ESTree.BinaryOperator]: (x1, x2) => any } = {
-      '==': (a, b) => a == b,
-      '!=': (a, b) => a != b,
-      '===': (a, b) => a === b,
-      '!==': (a, b) => a !== b,
-      '<': (a, b) => a < b,
-      '<=': (a, b) => a <= b,
-      '>': (a, b) => a > b,
-      '>=': (a, b) => a >= b,
-      '<<': (a, b) => a << b,
-      '>>': (a, b) => a >> b,
-      '>>>': (a, b) => a >>> b,
-      '+': (a, b) => a + b,
-      '-': (a, b) => a - b,
-      '*': (a, b) => a * b,
-      '/': (a, b) => a / b,
-      '%': (a, b) => a % b,
-      '|': (a, b) => a | b,
-      '^': (a, b) => a ^ b,
-      '&': (a, b) => a & b,
-      '**': (a, b) => a ** b,
+  BinaryExpression: (
+    { left, operator, right }: ESTree.BinaryExpression,
+    scope: Scope,
+  ) => {
+    let operators: { [key in ESTree.BinaryOperator]: (x1: any, x2: any) => any
+    } = {
+      "==": (a, b) => a == b,
+      "!=": (a, b) => a != b,
+      "===": (a, b) => a === b,
+      "!==": (a, b) => a !== b,
+      "<": (a, b) => a < b,
+      "<=": (a, b) => a <= b,
+      ">": (a, b) => a > b,
+      ">=": (a, b) => a >= b,
+      "<<": (a, b) => a << b,
+      ">>": (a, b) => a >> b,
+      ">>>": (a, b) => a >>> b,
+      "+": (a, b) => a + b,
+      "-": (a, b) => a - b,
+      "*": (a, b) => a * b,
+      "/": (a, b) => a / b,
+      "%": (a, b) => a % b,
+      "|": (a, b) => a | b,
+      "^": (a, b) => a ^ b,
+      "&": (a, b) => a & b,
+      "**": (a, b) => a ** b,
       in: (a, b) => a in b,
       instanceof: (a, b) => a instanceof b,
     };
@@ -389,34 +418,36 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   AssignmentExpression: (node: ESTree.AssignmentExpression, scope: Scope) => {
     let $var: Var;
 
-    if (node.left.type === 'Identifier') {
+    if (node.left.type === "Identifier") {
       const { name } = node.left;
       const $var_or_not = scope.$find(name);
       if (!$var_or_not) throw `${name} 未定义`;
       $var = $var_or_not;
-    } else if (node.left.type === 'MemberExpression') {
+    } else if (node.left.type === "MemberExpression") {
       const left = node.left;
       const object = evaluate(left.object, scope);
-      let property = left.computed ? evaluate(left.property, scope) : (<ESTree.Identifier>left.property).name;
+      let property = left.computed
+        ? evaluate(left.property, scope)
+        : (<ESTree.Identifier> left.property).name;
       $var = new PropVar(object, property);
     } else {
-      throw '如果出现在这里，那就说明有问题了';
+      throw "如果出现在这里，那就说明有问题了";
     }
 
     let map: { [key in ESTree.AssignmentOperator]: (a: any) => any } = {
-      '=': (v) => ($var.value = v),
-      '+=': (v) => ($var.value += v),
-      '-=': (v) => ($var.value -= v),
-      '*=': (v) => ($var.value *= v),
-      '/=': (v) => ($var.value /= v),
-      '%=': (v) => ($var.value %= v),
-      '<<=': (v) => ($var.value <<= v),
-      '>>=': (v) => ($var.value >>= v),
-      '>>>=': (v) => ($var.value >>>= v),
-      '|=': (v) => ($var.value |= v),
-      '^=': (v) => ($var.value ^= v),
-      '&=': (v) => ($var.value &= v),
-      '**=': (v) => ($var.value **= v),
+      "=": (v) => ($var.value = v),
+      "+=": (v) => ($var.value += v),
+      "-=": (v) => ($var.value -= v),
+      "*=": (v) => ($var.value *= v),
+      "/=": (v) => ($var.value /= v),
+      "%=": (v) => ($var.value %= v),
+      "<<=": (v) => ($var.value <<= v),
+      ">>=": (v) => ($var.value >>= v),
+      ">>>=": (v) => ($var.value >>>= v),
+      "|=": (v) => ($var.value |= v),
+      "^=": (v) => ($var.value ^= v),
+      "&=": (v) => ($var.value &= v),
+      "**=": (v) => ($var.value **= v),
     };
     return map[node.operator](evaluate(node.right, scope));
   },
@@ -425,8 +456,8 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
     const left = evaluate(node.left, scope);
     const right = evaluate(node.right, scope);
     let map: { [key in ESTree.LogicalOperator]: any } = {
-      '||': () => left || right,
-      '&&': () => left && right,
+      "||": () => left || right,
+      "&&": () => left && right,
     };
     return map[node.operator]();
   },
@@ -436,12 +467,14 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
     if (computed) {
       return evaluate(object, scope)[evaluate(property, scope)];
     } else {
-      return evaluate(object, scope)?.[(<ESTree.Identifier>property).name];
+      return evaluate(object, scope)?.[(<ESTree.Identifier> property).name];
     }
   },
 
   ConditionalExpression: (node: ESTree.ConditionalExpression, scope: Scope) => {
-    return evaluate(node.test, scope) ? evaluate(node.consequent, scope) : evaluate(node.alternate, scope);
+    return evaluate(node.test, scope)
+      ? evaluate(node.consequent, scope)
+      : evaluate(node.alternate, scope);
   },
 
   CallExpression: (node: ESTree.CallExpression, scope: Scope) => {
@@ -449,11 +482,11 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
     const args = node.arguments.map((arg) => evaluate(arg, scope));
 
     // 心疼自己
-    if (node.callee.type === 'MemberExpression') {
+    if (node.callee.type === "MemberExpression") {
       const object = evaluate(node.callee.object, scope);
       return func.apply(object, args);
     } else {
-      const this_val = scope.$find('this');
+      const this_val = scope.$find("this");
       return func.apply(this_val?.value, args);
     }
   },
@@ -473,7 +506,7 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   },
 
   Property: (node: ESTree.Property, scope: Scope, computed: boolean) => {
-    throw '这里如果被执行了那也是错的...';
+    throw "这里如果被执行了那也是错的...";
   },
 
   // 下面是 es6 / es7 特性, 先不做处理
@@ -501,7 +534,10 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   ClassDeclaration: (node: ESTree.ClassDeclaration, scope: Scope) => {
     throw `${node.type} 未实现`;
   },
-  TaggedTemplateExpression: (node: ESTree.TaggedTemplateExpression, scope: Scope) => {
+  TaggedTemplateExpression: (
+    node: ESTree.TaggedTemplateExpression,
+    scope: Scope,
+  ) => {
     throw `${node.type} 未实现`;
   },
   MethodDefinition: (node: ESTree.MethodDefinition, scope: Scope) => {
@@ -528,10 +564,16 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   ImportDeclaration: (node: ESTree.ImportDeclaration, scope: Scope) => {
     throw `${node.type} 未实现`;
   },
-  ExportNamedDeclaration: (node: ESTree.ExportNamedDeclaration, scope: Scope) => {
+  ExportNamedDeclaration: (
+    node: ESTree.ExportNamedDeclaration,
+    scope: Scope,
+  ) => {
     throw `${node.type} 未实现`;
   },
-  ExportDefaultDeclaration: (node: ESTree.ExportDefaultDeclaration, scope: Scope) => {
+  ExportDefaultDeclaration: (
+    node: ESTree.ExportDefaultDeclaration,
+    scope: Scope,
+  ) => {
     throw `${node.type} 未实现`;
   },
   ExportAllDeclaration: (node: ESTree.ExportAllDeclaration, scope: Scope) => {
@@ -540,29 +582,38 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
   ImportSpecifier: (node: ESTree.ImportSpecifier, scope: Scope) => {
     throw `${node.type} 未实现`;
   },
-  ImportDefaultSpecifier: (node: ESTree.ImportDefaultSpecifier, scope: Scope) => {
+  ImportDefaultSpecifier: (
+    node: ESTree.ImportDefaultSpecifier,
+    scope: Scope,
+  ) => {
     throw `${node.type} 未实现`;
   },
-  ImportNamespaceSpecifier: (node: ESTree.ImportNamespaceSpecifier, scope: Scope) => {
+  ImportNamespaceSpecifier: (
+    node: ESTree.ImportNamespaceSpecifier,
+    scope: Scope,
+  ) => {
     throw `${node.type} 未实现`;
   },
   ExportSpecifier: (node: ESTree.ExportSpecifier, scope: Scope) => {
     // throw `${node.type} 未实现`
     console.log(`${node.type} 未实现`);
-    const value = scope.$find('exports')?.value;
-    value['node.exported.name'] = scope.$find(node.exported.name)?.value;
+    const value = scope.$find("exports")?.value;
+    value["node.exported.name"] = scope.$find(node.exported.name)?.value;
   },
   YieldExpression: (node: ESTree.YieldExpression, scope: Scope) => {
     throw `${node.type} 未实现`;
   },
-  ArrowFunctionExpression: (node: ESTree.ArrowFunctionExpression, scope: Scope) => {
+  ArrowFunctionExpression: (
+    node: ESTree.ArrowFunctionExpression,
+    scope: Scope,
+  ) => {
     if (node.async) {
-      return async function(...args) {
+      return async function (...args: any[]) {
         // noinspection DuplicatedCode
-        const new_scope = new Scope('function', scope, true);
+        const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier>node.params[i];
-          new_scope.$declar('const', name, args[i]);
+          const { name } = <ESTree.Identifier> node.params[i];
+          new_scope.$declar("const", name, args[i]);
         }
         const result = evaluate(node.body, new_scope);
         if (node.expression) {
@@ -576,12 +627,12 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
         }
       };
     } else {
-      return function(...args) {
+      return function (...args: any[]) {
         // noinspection DuplicatedCode
-        const new_scope = new Scope('function', scope, true);
+        const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier>node.params[i];
-          new_scope.$declar('const', name, args[i]);
+          const { name } = <ESTree.Identifier> node.params[i];
+          new_scope.$declar("const", name, args[i]);
         }
         const result = evaluate(node.body, new_scope);
         if (node.expression) {
@@ -599,7 +650,7 @@ const evaluate_map: { [key in ESTree.Node['type']]: any } = {
 };
 
 const evaluate = (node: ESTree.Node, scope: Scope, arg?: any) => {
-  const _evalute = <EvaluateFunc>evaluate_map[node.type];
+  const _evalute = <EvaluateFunc> evaluate_map[node.type];
   return _evalute(node, scope, arg);
 };
 

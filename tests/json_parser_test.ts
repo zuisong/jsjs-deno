@@ -1,20 +1,20 @@
 import { run } from "../src/main.ts";
+import { log } from "../deps.ts";
 
-// @ts-ignore
 let s = await Deno.readFile("tests/json-parser.js");
 const code = new TextDecoder().decode(s);
 
 console.log(code);
 
 const save_ast = (ast: string) => {
-  console.log(ast);
-  Deno.writeFileSync("json-parser-ast.json", new TextEncoder().encode(ast));
+  log.info(ast);
+  // Deno.writeFileSync("json-parser-ast.json", new TextEncoder().encode(ast));
 };
 
 let { generateAST, generateObject, generateTokes } = run(code, { save_ast });
 
 // 原本的json串
-const a = `
+const json = `
 {
     c: -11,
     d: [
@@ -58,7 +58,7 @@ const expectTokens = [
   { type: "大括号", value: "}" },
 ];
 
-const tokens = generateTokes(a);
+const tokens = generateTokes(json);
 
 console.log(tokens);
 //deepStrictEqual(tokens, expectTokens, 'token 转换不符合预期')
@@ -69,7 +69,7 @@ const obj = generateObject(ast);
 
 //deepStrictEqual(obj, expectObject, '对象转换不对')
 
-console.log(a);
+console.log(json);
 console.log(obj);
 
 console.log("OK!!! All down!!!");

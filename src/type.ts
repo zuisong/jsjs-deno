@@ -75,6 +75,7 @@ export type EvaluateMap = {
     //@ts-ignore
     key in ESTree.Node["type"]
   ]: (
+    //@ts-ignore
     node: NodeTypeMap[key],
     scope: Scope,
     arg?: any,

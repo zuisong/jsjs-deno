@@ -1,11 +1,11 @@
-import { ESTree, babelParser, babelType } from "../deps.ts";
+import { ESTree, acorn } from "../deps.ts";
 import evaluate from "./eval.ts";
 import { Scope } from "./scope.ts";
 declare const require: (module: string) => any;
 const options = {
   sourceType: "script",
-  plugins: ["estree"],
-} as babelParser.ParserOptions;
+  ecmaVersion: 8,
+} as acorn.Options;
 
 // 导出默认对象
 const default_api: { [key: string]: any } = {
@@ -73,7 +73,7 @@ export function run(
   scope.$declar("const", "module", $module);
   scope.$declar("var", "exports", $exports);
 
-  const program = babelParser.parse(code, options).program;
+  const program = acorn.parse(code, options);
   const ast = JSON.stringify(program, null, 2);
   append_api?.save_ast?.(ast);
   evaluate(program as any, scope);

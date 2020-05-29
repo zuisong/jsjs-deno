@@ -600,7 +600,6 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
   ExportSpecifier: (node: ESTree.ExportSpecifier, scope: Scope) => {
     // throw `${node.type} 未实现`
-    console.log(`${node.type} 未实现`);
     const value = scope.$find("exports")?.value;
     value["node.exported.name"] = scope.$find(node.exported.name)?.value;
   },

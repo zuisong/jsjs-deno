@@ -4,7 +4,7 @@ import { log } from "../deps.ts";
 let s = await Deno.readFile("tests/json-parser.js");
 const code = new TextDecoder().decode(s);
 
-console.log(code);
+log.info(code);
 
 const save_ast = (ast: string) => {
   log.info(ast);
@@ -60,7 +60,7 @@ const expectTokens = [
 
 const tokens = generateTokes(json);
 
-console.log(tokens);
+log.info(tokens);
 //deepStrictEqual(tokens, expectTokens, 'token 转换不符合预期')
 
 const ast = generateAST(tokens);
@@ -69,7 +69,7 @@ const obj = generateObject(ast);
 
 //deepStrictEqual(obj, expectObject, '对象转换不对')
 
-console.log(json);
-console.log(obj);
+log.info(json);
+log.info(obj);
 
-console.log("OK!!! All down!!!");
+log.info("OK!!! All down!!!");

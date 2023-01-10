@@ -21,7 +21,7 @@ let code = `
   }
 
 `;
-let { test } = interpreter.run(code);
+const { test } = interpreter.run(code);
 // console.log(code);
 
 console.log("=========================");

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/gh/denoland/deno/cli/schemas/config-file.v1.json",
+  "importMap": "import_map.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "strict": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "dom.asynciterable",
+      "deno.ns"
+    ]
+  },
+  "tasks": {
+    "build": "deno task clean && deno task test-cov && deno task vite-build ",
+    "vite-build": "deno run -A npm:vite build && cp dist/notion-kroki.js notion-kroki.user.js",
+    "clean": "rm -rf dist/ coverage/",
+    "fmt": "deno fmt",
+    "test-cov": "deno test --coverage=coverage/json --no-check -A && deno coverage coverage/json --lcov --output=coverage/lcov.info",
+    "html-report": "deno task clean && deno task test-cov && genhtml -o coverage/html coverage/lcov.info"
+  },
+}

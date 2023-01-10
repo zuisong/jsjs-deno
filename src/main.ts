@@ -1,4 +1,4 @@
-import { ESTree, acorn } from "../deps.ts";
+import { acorn } from "../deps.ts";
 import evaluate from "./eval.ts";
 import { Scope } from "./scope.ts";
 declare const require: (module: string) => any;

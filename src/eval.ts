@@ -6,7 +6,7 @@ const BREAK_SINGAL: {} = {};
 const CONTINUE_SINGAL: {} = {};
 const RETURN_SINGAL: { result: any } = { result: undefined };
 
-const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
+const evaluate_map = {
   ImportExpression: (node: ESTree.ImportExpression, scope: Scope) => {
     throw `${node.type} 未实现`;
   },
@@ -251,7 +251,6 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
 
   ArrayExpression: (node: ESTree.ArrayExpression, scope: Scope) => {
-    //@ts-ignore
     return node.elements.map((item) => evaluate(item, scope));
   },
 
@@ -321,7 +320,6 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
 
   UnaryExpression: (node: ESTree.UnaryExpression, scope: Scope) => {
-    //@ts-ignore
     return {
       "-": () => -evaluate(node.argument, scope),
       "+": () => +evaluate(node.argument, scope),
@@ -372,7 +370,6 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
       $var = new PropVar(object, property);
     }
 
-    //@ts-ignore
     return {
       "--": (v: number) => {
         $var.value = v - 1;
@@ -389,7 +386,8 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
     { left, operator, right }: ESTree.BinaryExpression,
     scope: Scope,
   ) => {
-    let operators: { [key in ESTree.BinaryOperator]: (x1: any, x2: any) => any
+    let operators: {
+      [key in ESTree.BinaryOperator]: (x1: any, x2: any) => any;
     } = {
       "==": (a, b) => a == b,
       "!=": (a, b) => a != b,
@@ -457,9 +455,10 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   LogicalExpression: (node: ESTree.LogicalExpression, scope: Scope) => {
     const left = evaluate(node.left, scope);
     const right = evaluate(node.right, scope);
-    let map: { [key in ESTree.LogicalOperator]: any } = {
+    const map: { [key in ESTree.LogicalOperator]: any } = {
       "||": () => left || right,
       "&&": () => left && right,
+      "??": () => left ?? right,
     };
     return map[node.operator]();
   },
@@ -481,7 +480,6 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
 
   CallExpression: (node: ESTree.CallExpression, scope: Scope) => {
     const func = evaluate(node.callee, scope);
-    //@ts-ignore
     const args = node.arguments.map((arg) => evaluate(arg, scope));
 
     // 心疼自己
@@ -496,7 +494,7 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
 
   NewExpression: (node: ESTree.NewExpression, scope: Scope) => {
     const func = evaluate(node.callee, scope);
-    //@ts-ignore
+
     const args = node.arguments.map((arg) => evaluate(arg, scope));
     return new (func.bind.apply(func, [null].concat(args)))();
   },
@@ -606,6 +604,18 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   YieldExpression: (node: ESTree.YieldExpression, scope: Scope) => {
     throw `${node.type} 未实现`;
   },
+  ChainExpression: (node: ESTree.YieldExpression, scope: Scope) => {
+    throw `${node.type} 未实现`;
+  },
+  PrivateIdentifier: (node: ESTree.YieldExpression, scope: Scope) => {
+    throw `${node.type} 未实现`;
+  },
+  PropertyDefinition: (node: ESTree.YieldExpression, scope: Scope) => {
+    throw `${node.type} 未实现`;
+  },
+  StaticBlock: (node: ESTree.YieldExpression, scope: Scope) => {
+    throw `${node.type} 未实现`;
+  },
   ArrowFunctionExpression: (
     node: ESTree.ArrowFunctionExpression,
     scope: Scope,
@@ -652,7 +662,8 @@ const evaluate_map: { [key in ESTree.Node["type"]]: any } = {
   },
 };
 
-const evaluate = (node: ESTree.Node, scope: Scope, arg?: any) => {
+const evaluate = (node: ESTree.Node | null, scope: Scope, arg?: any) => {
+  if (node == null) return null;
   const _evalute = <EvaluateFunc> evaluate_map[node.type];
   return _evalute(node, scope, arg);
 };

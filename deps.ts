@@ -1,4 +1,4 @@
-export * as log from "https://deno.land/x/std/log/mod.ts";
-export * as ESTree from "./types/estree.ts";
-import * as acorn from "https://cdn.pika.dev/acorn@^7.2.0";
-export { acorn };
+export * as log from "deno_std/log/mod.ts";
+import * as ESTree from "https://unpkg.com/@types/estree@1.0.0/index.d.ts";
+import * as acorn from "https://esm.sh/acorn@7.4.1";
+export { acorn, ESTree };

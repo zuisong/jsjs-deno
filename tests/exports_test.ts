@@ -1,7 +1,8 @@
 import * as interpreter from "../src/main.ts";
 
-// language=JavaScript
-let code = `
+Deno.test("export test", () => {
+  // language=JavaScript
+  const code = `
   function test() {
 
     console.log(("hello world"));
@@ -21,8 +22,9 @@ let code = `
   }
 
 `;
-const { test } = interpreter.run(code);
-// console.log(code);
+  const { test } = interpreter.run(code);
+  // console.log(code);
 
-console.log("=========================");
-test();
+  console.log("=========================");
+  test();
+});

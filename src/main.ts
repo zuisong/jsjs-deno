@@ -1,16 +1,18 @@
-import { acorn } from "../deps.ts";
+import { acorn, ESTree } from "../deps.ts";
 import evaluate from "./eval.ts";
 import { Scope } from "./scope.ts";
 declare const require: (module: string) => any;
 const options = {
   sourceType: "script",
-  ecmaVersion: 8,
+  ecmaVersion: 2022,
+  locations: true,
+  ranges: true,
 } as acorn.Options;
 
 // 导出默认对象
 const default_api: { [key: string]: any } = {
   ...window,
-
+  fetch,
   console,
 
   setTimeout,
@@ -73,10 +75,8 @@ export function run(
   scope.$declar("const", "module", $module);
   scope.$declar("var", "exports", $exports);
 
-  const program = acorn.parse(code, options);
-  const ast = JSON.stringify(program, null, 2);
-  append_api?.save_ast?.(ast);
-  evaluate(program as any, scope);
+  const program: ESTree.Node = acorn.parse(code, options) as ESTree.Node;
+  evaluate(program, scope);
 
   // exports
   const exports_var = scope.$find("exports");

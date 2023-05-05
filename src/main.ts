@@ -25,8 +25,8 @@ const default_api: { [key: string]: any } = {
   encodeURIComponent,
   decodeURI,
   decodeURIComponent,
-  escape,
-  unescape,
+  escape: window.escape,
+  unescape : window.unescape,
   Map,
   Infinity,
   NaN,
@@ -53,11 +53,23 @@ const default_api: { [key: string]: any } = {
   Promise,
 };
 
+import babel from "https://esm.sh/@babel/standalone@7.21.8"
+
 export function run(
   this: any,
   code: string,
   append_api: { [key: string]: any } = {},
 ) {
+
+  const transformedCode = babel.transform(
+    code,
+    {
+      filename: "a.ts",
+      presets: ["env", "typescript"],
+    }
+  ).code ?? ""
+
+
   const scope = new Scope("block");
   scope.$declar("const", "this", this);
 
@@ -75,7 +87,7 @@ export function run(
   scope.$declar("const", "module", $module);
   scope.$declar("var", "exports", $exports);
 
-  const program: ESTree.Node = acorn.parse(code, options) as ESTree.Node;
+  const program: ESTree.Node = acorn.parse(transformedCode, options) as ESTree.Node;
   evaluate(program, scope);
 
   // exports

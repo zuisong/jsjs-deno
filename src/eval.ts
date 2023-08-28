@@ -1,10 +1,10 @@
-import { EvaluateFunc } from "./type.ts";
-import { PropVar, Scope, Var } from "./scope.ts";
 import { ESTree } from "../deps.ts";
+import { PropVar, Scope, Var } from "./scope.ts";
+import { EvaluateFunc } from "./type.ts";
 
 const BREAK_SINGAL: {} = {};
 const CONTINUE_SINGAL: {} = {};
-const RETURN_SINGAL: { result: any } = { result: undefined };
+const RETURN_SINGAL: { result: undefined } = { result: undefined };
 
 const evaluate_map = {
   ImportExpression: (node: ESTree.ImportExpression, scope: Scope) => {
@@ -37,7 +37,7 @@ const evaluate_map = {
   },
 
   BlockStatement: (block: ESTree.BlockStatement, scope: Scope) => {
-    let new_scope = scope.invasive ? scope : new Scope("block", scope);
+    const new_scope = scope.invasive ? scope : new Scope("block", scope);
     for (const node of block.body) {
       const result = evaluate(node, new_scope);
       if (
@@ -54,9 +54,7 @@ const evaluate_map = {
     /* 空当然啥都不干嘛 */
   },
 
-  DebuggerStatement: (node: ESTree.DebuggerStatement, scope: Scope) => {
-    debugger;
-  },
+  DebuggerStatement: (node: ESTree.DebuggerStatement, scope: Scope) => {},
 
   ExpressionStatement: (node: ESTree.ExpressionStatement, scope: Scope) => {
     evaluate(node.expression, scope);
@@ -223,7 +221,7 @@ const evaluate_map = {
   },
 
   FunctionDeclaration: (node: ESTree.FunctionDeclaration, scope: Scope) => {
-    const func = evaluate_map["FunctionExpression"](<any>node, scope);
+    const func = evaluate_map.FunctionExpression(<any>node, scope);
     const { name: func_name } = node.id!;
     if (!scope.$declar("const", func_name, func)) {
       throw `[Error] ${func_name} 重复定义`;
@@ -260,7 +258,7 @@ const evaluate_map = {
     const object: any = {};
     for (const property1 of node.properties) {
       if (true) {
-        let property = property1 as ESTree.Property;
+        const property = property1 as ESTree.Property;
         const kind = property.kind;
 
         let key: string;
@@ -365,7 +363,7 @@ const evaluate_map = {
     } else if (node.argument.type === "MemberExpression") {
       const argument = node.argument;
       const object = evaluate(argument.object, scope);
-      let property = argument.computed
+      const property = argument.computed
         ? evaluate(argument.property, scope)
         : (<ESTree.Identifier>argument.property).name;
       $var = new PropVar(object, property);
@@ -387,7 +385,7 @@ const evaluate_map = {
     { left, operator, right }: ESTree.BinaryExpression,
     scope: Scope,
   ) => {
-    let operators: {
+    const operators: {
       [key in ESTree.BinaryOperator]: (x1: any, x2: any) => any;
     } = {
       "==": (a, b) => a == b,
@@ -427,7 +425,7 @@ const evaluate_map = {
     } else if (node.left.type === "MemberExpression") {
       const left = node.left;
       const object = evaluate(left.object, scope);
-      let property = left.computed
+      const property = left.computed
         ? evaluate(left.property, scope)
         : (<ESTree.Identifier>left.property).name;
       $var = new PropVar(object, property);
@@ -435,20 +433,23 @@ const evaluate_map = {
       throw "如果出现在这里，那就说明有问题了";
     }
 
-    let map: { [key in ESTree.AssignmentOperator]: (a: any) => any } = {
-      "=": (v) => ($var.value = v),
-      "+=": (v) => ($var.value += v),
-      "-=": (v) => ($var.value -= v),
-      "*=": (v) => ($var.value *= v),
-      "/=": (v) => ($var.value /= v),
-      "%=": (v) => ($var.value %= v),
-      "<<=": (v) => ($var.value <<= v),
-      ">>=": (v) => ($var.value >>= v),
-      ">>>=": (v) => ($var.value >>>= v),
-      "|=": (v) => ($var.value |= v),
-      "^=": (v) => ($var.value ^= v),
-      "&=": (v) => ($var.value &= v),
-      "**=": (v) => ($var.value **= v),
+    const map: { [key in ESTree.AssignmentOperator]: (a: any) => any } = {
+      "=": (a) => ($var.value = a),
+      "+=": (a) => ($var.value += a),
+      "-=": (a) => ($var.value -= a),
+      "*=": (a) => ($var.value *= a),
+      "/=": (a) => ($var.value /= a),
+      "%=": (a) => ($var.value %= a),
+      "**=": (a) => ($var.value **= a),
+      "<<=": (a) => ($var.value <<= a),
+      ">>=": (a) => ($var.value >>= a),
+      ">>>=": (a) => ($var.value >>>= a),
+      "|=": (a) => ($var.value |= a),
+      "^=": (a) => ($var.value ^= a),
+      "&=": (a) => ($var.value &= a),
+      "||=": (a) => ($var.value ||= a),
+      "&&=": (a) => ($var.value &&= a),
+      "??=": (a) => ($var.value ??= a),
     };
     return map[node.operator](evaluate(node.right, scope));
   },

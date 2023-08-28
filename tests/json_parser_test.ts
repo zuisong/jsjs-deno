@@ -1,5 +1,5 @@
-import { run } from "../src/main.ts";
 import { log } from "../deps.ts";
+import { run } from "../src/main.ts";
 import { assertEquals } from "deno_std/assert/assert_equals.ts";
 
 Deno.test("json 序列化测试", async () => {

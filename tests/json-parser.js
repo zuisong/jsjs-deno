@@ -1,7 +1,7 @@
 // "use strict";
 exports.__esModule = true;
 // 工具类 返回一对值
-var Pair = /** @class */ (function () {
+const Pair = /** @class */ (function () {
   function Pair(first, second) {
     this.first = first;
     this.second = second;
@@ -21,7 +21,7 @@ function required(t, fn, message) {
   }
   return t;
 }
-var Token = /** @class */ (function () {
+const Token = /** @class */ (function () {
   function Token(type, value) {
     this.type = type;
     this.value = value;
@@ -29,7 +29,7 @@ var Token = /** @class */ (function () {
   return Token;
 })();
 exports.Token = Token;
-var JsonNode = /** @class */ (function () {
+const JsonNode = /** @class */ (function () {
   function JsonNode() {}
   return JsonNode;
 })();
@@ -37,49 +37,49 @@ var JsonNode = /** @class */ (function () {
 // 这里无关语法规则，不校验任何语法
 function generateTokes(input) {
   function getToken(idx) {
-    var c = input[idx];
+    let c = input[idx];
     if (c === "{" || c === "}") {
-      var t = {
+      const t = {
         type: "大括号",
         value: c,
       };
       return Pair.of(idx + 1, t);
     }
     if (c === "[" || c === "]") {
-      var t = {
+      const t = {
         type: "方括号",
         value: c,
       };
       return Pair.of(idx + 1, t);
     }
     if (c === ":") {
-      var t = {
+      const t = {
         type: "冒号",
         value: c,
       };
       return Pair.of(idx + 1, t);
     }
     if (c === ",") {
-      var t = {
+      const t = {
         type: "逗号",
         value: c,
       };
       return Pair.of(idx + 1, t);
     }
-    var WHITESPACE = new RegExp("\\s");
+    const WHITESPACE = new RegExp("\\s");
     if (WHITESPACE.test(c)) {
       return Pair.of(idx + 1, null);
     }
     // 数字
-    var NUMBERS = new RegExp("\\d");
+    const NUMBERS = new RegExp("\\d");
     if (NUMBERS.test(c) || c === "-") {
-      var value = c;
+      let value = c;
       c = input[idx + value.length];
       while (NUMBERS.test(c)) {
         value += c;
         c = input[idx + value.length];
       }
-      var t = {
+      const t = {
         type: "数字",
         value: value,
       };
@@ -90,8 +90,8 @@ function generateTokes(input) {
      */
     if (c === '"' || c === "'") {
       // 保存结束的字符   这里的json可以使用单引号或者双引号作为字符串
-      var closeSign = c;
-      var value = "";
+      const closeSign = c;
+      let value = "";
       idx++; // 跳过开始符
       c = input[idx];
       while (c !== closeSign) {
@@ -99,21 +99,21 @@ function generateTokes(input) {
         idx++;
         c = input[idx];
       }
-      var t = {
+      const t = {
         type: "字符串",
         value: value,
       };
       idx++; // 跳过结束符
       return Pair.of(idx, t);
     }
-    var LETTERS = new RegExp("[a-z]", "i");
+    const LETTERS = new RegExp("[a-z]", "i");
     if (LETTERS.test(c)) {
-      var value = "";
+      let value = "";
       while (LETTERS.test(c)) {
         value += c;
         c = input[idx + value.length];
       }
-      var t = {
+      const t = {
         type: "名字",
         value: value,
       };
@@ -121,12 +121,12 @@ function generateTokes(input) {
     }
     // Finally if we have not matched a character by now, we're going to throw
     // an error and completely exit.
-    throw new TypeError("I dont know what this character is: " + c);
+    throw new TypeError(`I dont know what this character is: ${c}`);
   }
-  var current = 0;
-  var tokens = [];
+  let current = 0;
+  const tokens = [];
   do {
-    var p = getToken(current);
+    const p = getToken(current);
     current = p.first;
     if (p.second) {
       tokens.push(p.second);
@@ -140,16 +140,16 @@ function generateAST(tokens) {
     if (tokens[idx].type === "逗号") {
       idx++;
     }
-    var t = tokens[idx];
+    const t = tokens[idx];
     if (t.type === "大括号" && t.value === "{") {
       idx++; // 跳过大括号节点
-      var node = new JsonNode();
+      const node = new JsonNode();
       node.type = "JsonNode";
       node.value = new Map();
       // 大括号处理
       // 保存存有名字token
       while (tokens[idx].type !== "大括号" && tokens[idx].value !== "}") {
-        var nameToken = tokens[idx];
+        const nameToken = tokens[idx];
         required(
           nameToken,
           function (it) {
@@ -165,7 +165,7 @@ function generateAST(tokens) {
           "只能是冒号",
         );
         // 通过递归获取子节点
-        var p = getNode(idx + 2);
+        const p = getNode(idx + 2);
         node.value.set(nameToken.value, p.second);
         idx = p.first;
         if (tokens[idx].type === "逗号") {
@@ -178,13 +178,13 @@ function generateAST(tokens) {
       idx++; // 跳过结尾的反大括号
       return Pair.of(idx, node);
     }
-    if (t.type === "方括号" && t.value == "[") {
+    if (t.type === "方括号" && t.value === "[") {
       idx++;
-      var node = new JsonNode();
+      const node = new JsonNode();
       node.type = "NODE_ARRAY";
       node.value = new Array();
       while (tokens[idx].type !== "方括号" && tokens[idx].value !== "]") {
-        var p = getNode(idx);
+        const p = getNode(idx);
         node.value.push(p.second);
         idx = p.first;
         if (tokens[idx].type === "逗号") {
@@ -195,20 +195,20 @@ function generateAST(tokens) {
       return Pair.of(idx, node);
     }
     if (t.type === "数字") {
-      var node = new JsonNode();
+      const node = new JsonNode();
       node.type = "NumberValue";
       node.value = Number(t.value);
       return Pair.of(idx + 1, node);
     }
     if (t.type === "字符串") {
-      var node = new JsonNode();
+      const node = new JsonNode();
       node.type = "StringValue";
       node.value = t.value;
       return Pair.of(idx + 1, node);
     }
     throw new Error(JSON.stringify(t));
   }
-  var res = getNode(0);
+  const res = getNode(0);
   required(
     res.first,
     function (it) {
@@ -226,10 +226,10 @@ function generateObject(ast) {
       return node.value;
     }
     if (node.type === "JsonNode" || node.type === "ROOT_NODE") {
-      var m = node.value;
-      var resultMap_1 = new Map();
+      const m = node.value;
+      const resultMap_1 = new Map();
       // console.log(m.keys())
-      var resultObj_1 = {};
+      const resultObj_1 = {};
       m.forEach(function (value, key) {
         resultMap_1.set(key, translate(value));
         resultObj_1[key] = translate(value);
@@ -237,8 +237,8 @@ function generateObject(ast) {
       return resultObj_1;
     }
     if (node.type === "NODE_ARRAY") {
-      var arr_1 = new Array();
-      var a = node.value;
+      const arr_1 = new Array();
+      const a = node.value;
       a.forEach(function (value) {
         arr_1.push(translate(value));
       });

@@ -12,6 +12,12 @@
       "recommended": true,
       "style": {
         "noNonNullAssertion": "warn"
+      },
+      "correctness": {
+        "noUnnecessaryContinue": "off"
+      },
+      "suspicious": {
+        "noDoubleEquals": "off"
       }
     }
   },

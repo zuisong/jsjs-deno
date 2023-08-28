@@ -1,9 +1,9 @@
 import { run } from "../src/main.ts";
 import { log } from "../deps.ts";
-import { assertEquals } from "deno_std/testing/asserts.ts";
+import { assertEquals } from "deno_std/assert/assert_equals.ts";
 
 Deno.test("json 序列化测试", async () => {
-  let s = await Deno.readFile("tests/json-parser.js");
+  const s = await Deno.readFile("tests/json-parser.js");
   const code = new TextDecoder().decode(s);
 
   const save_ast = (ast: string) => {
@@ -11,7 +11,9 @@ Deno.test("json 序列化测试", async () => {
     // Deno.writeFileSync("json-parser-ast.json", new TextEncoder().encode(ast));
   };
 
-  let { generateAST, generateObject, generateTokes } = run(code, { save_ast });
+  const { generateAST, generateObject, generateTokes } = run(code, {
+    save_ast,
+  });
 
   // 原本的json串
   const json = `

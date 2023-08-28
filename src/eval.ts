@@ -41,7 +41,8 @@ const evaluate_map = {
     for (const node of block.body) {
       const result = evaluate(node, new_scope);
       if (
-        result === BREAK_SINGAL || result === CONTINUE_SINGAL ||
+        result === BREAK_SINGAL ||
+        result === CONTINUE_SINGAL ||
         result === RETURN_SINGAL
       ) {
         return result;
@@ -115,7 +116,8 @@ const evaluate_map = {
     for (const stmt of node.consequent) {
       const result = evaluate(stmt, scope);
       if (
-        result === BREAK_SINGAL || result === CONTINUE_SINGAL ||
+        result === BREAK_SINGAL ||
+        result === CONTINUE_SINGAL ||
         result === RETURN_SINGAL
       ) {
         return result;
@@ -136,7 +138,7 @@ const evaluate_map = {
       return evaluate(node.block, scope);
     } catch (err) {
       if (node.handler) {
-        const param = <ESTree.Identifier> node.handler.param;
+        const param = <ESTree.Identifier>node.handler.param;
         const new_scope = new Scope("block", scope, true);
         new_scope.$declar("const", param.name, err);
         return evaluate(node.handler, new_scope);
@@ -202,9 +204,9 @@ const evaluate_map = {
   },
 
   ForInStatement: (node: ESTree.ForInStatement, scope: Scope) => {
-    const kind = (<ESTree.VariableDeclaration> node.left).kind;
-    const decl = (<ESTree.VariableDeclaration> node.left).declarations[0];
-    const name = (<ESTree.Identifier> decl.id).name;
+    const kind = (<ESTree.VariableDeclaration>node.left).kind;
+    const decl = (<ESTree.VariableDeclaration>node.left).declarations[0];
+    const name = (<ESTree.Identifier>decl.id).name;
 
     for (const value in evaluate(node.right, scope)) {
       const new_scope = new Scope("loop", scope, true);
@@ -221,8 +223,8 @@ const evaluate_map = {
   },
 
   FunctionDeclaration: (node: ESTree.FunctionDeclaration, scope: Scope) => {
-    const func = evaluate_map["FunctionExpression"](<any> node, scope);
-    const { name: func_name } = node.id!!;
+    const func = evaluate_map["FunctionExpression"](<any>node, scope);
+    const { name: func_name } = node.id!;
     if (!scope.$declar("const", func_name, func)) {
       throw `[Error] ${func_name} 重复定义`;
     }
@@ -231,7 +233,7 @@ const evaluate_map = {
   VariableDeclaration: (node: ESTree.VariableDeclaration, scope: Scope) => {
     const kind = node.kind;
     for (const declartor of node.declarations) {
-      const { name } = <ESTree.Identifier> declartor.id;
+      const { name } = <ESTree.Identifier>declartor.id;
       const value = declartor.init
         ? evaluate(declartor.init, scope)
         : undefined;
@@ -290,7 +292,7 @@ const evaluate_map = {
       return async function (...args: any[]) {
         const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier> node.params[i];
+          const { name } = <ESTree.Identifier>node.params[i];
           new_scope.$declar("const", name, args[i]);
         }
         //@ts-ignore
@@ -305,7 +307,7 @@ const evaluate_map = {
       return function (...args: any[]) {
         const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier> node.params[i];
+          const { name } = <ESTree.Identifier>node.params[i];
           new_scope.$declar("const", name, args[i]);
         }
         //@ts-ignore
@@ -341,10 +343,9 @@ const evaluate_map = {
           if (computed) {
             return delete evaluate(object, scope)[evaluate(property, scope)];
           } else {
-            return delete evaluate(
-              object,
-              scope,
-            )[(<ESTree.Identifier> property).name];
+            return delete evaluate(object, scope)[
+              (<ESTree.Identifier>property).name
+            ];
           }
         } else if (node.argument.type === "Identifier") {
           const $this = scope.$find("this");
@@ -359,14 +360,14 @@ const evaluate_map = {
     let $var: Var;
     if (node.argument.type === "Identifier") {
       const { name } = node.argument;
-      $var = scope.$find(name)!!;
+      $var = scope.$find(name)!;
       if (!$var) throw `${name} 未定义`;
     } else if (node.argument.type === "MemberExpression") {
       const argument = node.argument;
       const object = evaluate(argument.object, scope);
       let property = argument.computed
         ? evaluate(argument.property, scope)
-        : (<ESTree.Identifier> argument.property).name;
+        : (<ESTree.Identifier>argument.property).name;
       $var = new PropVar(object, property);
     }
 
@@ -428,7 +429,7 @@ const evaluate_map = {
       const object = evaluate(left.object, scope);
       let property = left.computed
         ? evaluate(left.property, scope)
-        : (<ESTree.Identifier> left.property).name;
+        : (<ESTree.Identifier>left.property).name;
       $var = new PropVar(object, property);
     } else {
       throw "如果出现在这里，那就说明有问题了";
@@ -468,7 +469,7 @@ const evaluate_map = {
     if (computed) {
       return evaluate(object, scope)[evaluate(property, scope)];
     } else {
-      return evaluate(object, scope)?.[(<ESTree.Identifier> property).name];
+      return evaluate(object, scope)?.[(<ESTree.Identifier>property).name];
     }
   },
 
@@ -625,7 +626,7 @@ const evaluate_map = {
         // noinspection DuplicatedCode
         const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier> node.params[i];
+          const { name } = <ESTree.Identifier>node.params[i];
           new_scope.$declar("const", name, args[i]);
         }
         const result = evaluate(node.body, new_scope);
@@ -644,7 +645,7 @@ const evaluate_map = {
         // noinspection DuplicatedCode
         const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier> node.params[i];
+          const { name } = <ESTree.Identifier>node.params[i];
           new_scope.$declar("const", name, args[i]);
         }
         const result = evaluate(node.body, new_scope);
@@ -664,7 +665,7 @@ const evaluate_map = {
 
 const evaluate = (node: ESTree.Node | null, scope: Scope, arg?: any) => {
   if (node == null) return null;
-  const _evalute = <EvaluateFunc> evaluate_map[node.type];
+  const _evalute = <EvaluateFunc>evaluate_map[node.type];
   return _evalute(node, scope, arg);
 };
 

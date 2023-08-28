@@ -1,7 +1,7 @@
 {
-  "$schema": "https://cdn.jsdelivr.net/gh/denoland/deno/cli/schemas/config-file.v1.json",
   "imports": {
-    "deno_std/": "https://deno.land/std@0.186.0/"
+    "deno_std/": "https://deno.land/std@0.200.0/",
+    "esm.sh/": "https://esm.sh/v131/",
   },
   "compilerOptions": {
     "allowJs": true,
@@ -20,15 +20,6 @@
     "test-cov": "deno test --coverage=coverage/json --no-check -A && deno coverage coverage/json --lcov --output=coverage/lcov.info",
     "html-report": "deno task clean && deno task test-cov && genhtml -o coverage/html coverage/lcov.info"
   },
-  "fmt":{
-
+  "fmt": {
   },
-  "lint": {
-    "rules": {
-      "exclude": [
-        "require-await",
-        "no-explicit-any",
-      ]
-    }
-  }
 }

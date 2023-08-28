@@ -11,7 +11,7 @@ export interface Var {
 export class ScopeVar implements Var {
   kind: Kind;
 
-  private inited: boolean = false;
+  private inited = false;
 
   constructor(kind: Kind, value: any) {
     this.kind = kind;
@@ -62,7 +62,7 @@ export class PropVar implements Var {
 export class Scope {
   readonly type: ScopeType;
   readonly invasive: boolean;
-  private readonly content: { [key: string]: Var };
+  private readonly content: Map<string, Var>;
   private readonly parent: Scope | null;
   private readonly prefix: string = "@";
 
@@ -74,14 +74,14 @@ export class Scope {
   ) {
     this.type = type;
     this.parent = parent || null;
-    this.content = {};
+    this.content = new Map();
     this.invasive = invasive;
   }
 
   $find(raw_name: string): Var | null {
     const name: string = this.prefix + raw_name;
-    if (this.content.hasOwnProperty(name)) {
-      return this.content[name];
+    if (this.content.has(name)) {
+      return this.content.get(name)!;
     } else if (this.parent) {
       return this.parent.$find(raw_name);
     } else {
@@ -95,9 +95,9 @@ export class Scope {
     type: "let" | "const",
   ): boolean {
     const name: string = this.prefix + raw_name;
-    const $var = this.content.hasOwnProperty(name);
+    const $var = this.content.has(name);
     if (!$var) {
-      this.content[name] = new ScopeVar(type, value);
+      this.content.set(name, new ScopeVar(type, value));
       return true;
     } else {
       return false;
@@ -111,9 +111,9 @@ export class Scope {
     while (scope.parent !== null && scope.type !== "function") {
       scope = scope.parent;
     }
-    const $var = scope.content[name];
+    const $var = scope.content.get(name);
     if (!$var) {
-      this.content[name] = new ScopeVar("var", value);
+      this.content.set(name, new ScopeVar("var", value));
       return true;
     } else {
       return false;
@@ -121,7 +121,7 @@ export class Scope {
   }
 
   $declar(kind: Kind, raw_name: string, value: any): boolean {
-    let declares = {
+    const declares: { [k in Kind]: () => boolean } = {
       var: () => this.$var(raw_name, value),
       let: () => this.$declar_(raw_name, value, "let"),
       const: () => this.$declar_(raw_name, value, "const"),

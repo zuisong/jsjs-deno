@@ -1,11 +1,13 @@
+import { Any } from "./type.ts";
+
 export type ScopeType = "function" | "loop" | "switch" | "block";
 
 export type Kind = "const" | "var" | "let";
 
 export interface Var {
-  value: any;
+  value: Any;
 
-  // $call($this: any, args: Array<any>): any
+  // $call($this: Any, args: Array<Any>): Any
 }
 
 export class ScopeVar implements Var {
@@ -13,19 +15,19 @@ export class ScopeVar implements Var {
 
   private inited = false;
 
-  constructor(kind: Kind, value: any) {
+  constructor(kind: Kind, value: Any) {
     this.kind = kind;
     this._value = value;
     this.inited = true;
   }
 
-  _value: any;
+  _value: Any;
 
-  get value(): any {
+  get value(): Any {
     return this._value;
   }
 
-  set value(value: any) {
+  set value(value: Any) {
     if (this.kind === "const" && this.inited) {
       console.error(this, value);
       // throw "const variable cannot reassign";
@@ -38,10 +40,10 @@ export class ScopeVar implements Var {
 }
 
 export class PropVar implements Var {
-  object: any;
+  object: Any;
   property: string;
 
-  constructor(object: any, property: string) {
+  constructor(object: Any, property: string) {
     this.object = object;
     this.property = property;
   }
@@ -50,7 +52,7 @@ export class PropVar implements Var {
     return this.object[this.property];
   }
 
-  set value(value: any) {
+  set value(value: Any) {
     this.object[this.property] = value;
   }
 
@@ -91,7 +93,7 @@ export class Scope {
 
   private $declar_(
     raw_name: string,
-    value: any,
+    value: Any,
     type: "let" | "const",
   ): boolean {
     const name: string = this.prefix + raw_name;
@@ -104,7 +106,7 @@ export class Scope {
     }
   }
 
-  $var(raw_name: string, value: any): boolean {
+  $var(raw_name: string, value: Any): boolean {
     const name = this.prefix + raw_name;
     let scope: Scope = this;
 

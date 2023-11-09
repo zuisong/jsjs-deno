@@ -1,7 +1,8 @@
 import { ESTree, acorn } from "../deps.ts";
 import evaluate from "./eval.ts";
 import { Scope } from "./scope.ts";
-declare const require: (module: string) => any;
+import { Any } from "./type.ts";
+declare const require: (module: string) => Any;
 const options = {
   sourceType: "script",
   ecmaVersion: 2022,
@@ -10,7 +11,7 @@ const options = {
 } as acorn.Options;
 
 // 导出默认对象
-const default_api: { [key: string]: any } = {
+const default_api: { [key: string]: Any } = {
   ...window,
   fetch,
   console,
@@ -56,9 +57,9 @@ const default_api: { [key: string]: any } = {
 import babel from "https://esm.sh/@babel/standalone@7.21.8";
 
 export function run(
-  this: any,
+  this: Any,
   code: string,
-  append_api: { [key: string]: any } = {},
+  append_api: { [key: string]: Any } = {},
 ) {
   const transformedCode =
     babel.transform(code, {

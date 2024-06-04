@@ -1,6 +1,4 @@
 {
   "deno.enable": true,
-  "Lua.diagnostics.globals": [
-    "split"
-  ]
+  "Lua.diagnostics.globals": ["split"]
 }

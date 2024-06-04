@@ -1,14 +1,12 @@
 // "use strict";
 exports.__esModule = true;
 // 工具类 返回一对值
-const Pair = /** @class */ (function () {
+const Pair = /** @class */ (() => {
   function Pair(first, second) {
     this.first = first;
     this.second = second;
   }
-  Pair.of = function (v1, v2) {
-    return { first: v1, second: v2 };
-  };
+  Pair.of = (v1, v2) => ({ first: v1, second: v2 });
   return Pair;
 })();
 // 工具方法 校验用
@@ -21,7 +19,7 @@ function required(t, fn, message) {
   }
   return t;
 }
-const Token = /** @class */ (function () {
+const Token = /** @class */ (() => {
   function Token(type, value) {
     this.type = type;
     this.value = value;
@@ -29,7 +27,7 @@ const Token = /** @class */ (function () {
   return Token;
 })();
 exports.Token = Token;
-const JsonNode = /** @class */ (function () {
+const JsonNode = /** @class */ (() => {
   function JsonNode() {}
   return JsonNode;
 })();
@@ -66,12 +64,12 @@ function generateTokes(input) {
       };
       return Pair.of(idx + 1, t);
     }
-    const WHITESPACE = new RegExp("\\s");
+    const WHITESPACE = /\s/;
     if (WHITESPACE.test(c)) {
       return Pair.of(idx + 1, null);
     }
     // 数字
-    const NUMBERS = new RegExp("\\d");
+    const NUMBERS = /\d/;
     if (NUMBERS.test(c) || c === "-") {
       let value = c;
       c = input[idx + value.length];
@@ -106,7 +104,7 @@ function generateTokes(input) {
       idx++; // 跳过结束符
       return Pair.of(idx, t);
     }
-    const LETTERS = new RegExp("[a-z]", "i");
+    const LETTERS = /[a-z]/i;
     if (LETTERS.test(c)) {
       let value = "";
       while (LETTERS.test(c)) {
@@ -152,18 +150,10 @@ function generateAST(tokens) {
         const nameToken = tokens[idx];
         required(
           nameToken,
-          function (it) {
-            return it.type === "名字" || it.type === "字符串";
-          },
+          (it) => it.type === "名字" || it.type === "字符串",
           "大括号后面只能跟名字或字符串",
         );
-        required(
-          tokens[idx + 1],
-          function (it) {
-            return it.type === "冒号";
-          },
-          "只能是冒号",
-        );
+        required(tokens[idx + 1], (it) => it.type === "冒号", "只能是冒号");
         // 通过递归获取子节点
         const p = getNode(idx + 2);
         node.value.set(nameToken.value, p.second);
@@ -171,9 +161,7 @@ function generateAST(tokens) {
         if (tokens[idx].type === "逗号") {
           idx++;
         }
-        required(idx, function (it) {
-          return it < tokens.length;
-        });
+        required(idx, (it) => it < tokens.length);
       }
       idx++; // 跳过结尾的反大括号
       return Pair.of(idx, node);
@@ -209,13 +197,7 @@ function generateAST(tokens) {
     throw new Error(JSON.stringify(t));
   }
   const res = getNode(0);
-  required(
-    res.first,
-    function (it) {
-      return it === tokens.length;
-    },
-    "必须直接到结尾",
-  );
+  required(res.first, (it) => it === tokens.length, "必须直接到结尾");
   res.second.type = "ROOT_NODE";
   return res.second;
 }
@@ -230,7 +212,7 @@ function generateObject(ast) {
       const resultMap_1 = new Map();
       // console.log(m.keys())
       const resultObj_1 = {};
-      m.forEach(function (value, key) {
+      m.forEach((value, key) => {
         resultMap_1.set(key, translate(value));
         resultObj_1[key] = translate(value);
       });
@@ -239,7 +221,7 @@ function generateObject(ast) {
     if (node.type === "NODE_ARRAY") {
       const arr_1 = new Array();
       const a = node.value;
-      a.forEach(function (value) {
+      a.forEach((value) => {
         arr_1.push(translate(value));
       });
       return arr_1;

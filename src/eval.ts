@@ -1,9 +1,9 @@
-import { ESTree } from "../deps.ts";
-import { PropVar, Scope, Var } from "./scope.ts";
-import { EvaluateFunc } from "./type.ts";
+import type { ESTree } from "../deps.ts";
+import { PropVar, Scope, type Var } from "./scope.ts";
+import type { EvaluateFunc } from "./type.ts";
 
-const BREAK_SINGAL: {} = {};
-const CONTINUE_SINGAL: {} = {};
+const BREAK_SINGAL = {};
+const CONTINUE_SINGAL = {};
 const RETURN_SINGAL: { result: undefined } = { result: undefined };
 
 const evaluate_map = {
@@ -25,11 +25,10 @@ const evaluate_map = {
     const $var = scope.$find(node.name);
     if ($var) {
       return $var.value;
-    } // 返回
-    else {
-      // return undefined
-      throw `[Error] ${JSON.stringify(node.loc)}, '${node.name}' 未定义`;
     }
+
+    // return undefined
+    throw `[Error] ${JSON.stringify(node.loc)}, '${node.name}' 未定义`;
   },
 
   Literal: (node: ESTree.Literal, scope: Scope) => {
@@ -81,7 +80,7 @@ const evaluate_map = {
 
   IfStatement: (node: ESTree.IfStatement, scope: Scope) => {
     if (evaluate(node.test, scope)) return evaluate(node.consequent, scope);
-    else if (node.alternate) return evaluate(node.alternate, scope);
+    if (node.alternate) return evaluate(node.alternate, scope);
   },
 
   SwitchStatement: (node: ESTree.SwitchStatement, scope: Scope) => {
@@ -103,7 +102,8 @@ const evaluate_map = {
 
         if (result === BREAK_SINGAL) {
           break;
-        } else if (result === CONTINUE_SINGAL || result === RETURN_SINGAL) {
+        }
+        if (result === CONTINUE_SINGAL || result === RETURN_SINGAL) {
           return result;
         }
       }
@@ -140,9 +140,8 @@ const evaluate_map = {
         const new_scope = new Scope("block", scope, true);
         new_scope.$declar("const", param.name, err);
         return evaluate(node.handler, new_scope);
-      } else {
-        throw err;
       }
+      throw err;
     } finally {
       if (node.finalizer) {
         evaluate(node.finalizer, scope);
@@ -161,9 +160,11 @@ const evaluate_map = {
 
       if (result === BREAK_SINGAL) {
         break;
-      } else if (result === CONTINUE_SINGAL) {
+      }
+      if (result === CONTINUE_SINGAL) {
         continue;
-      } else if (result === RETURN_SINGAL) {
+      }
+      if (result === RETURN_SINGAL) {
         return result;
       }
     }
@@ -175,9 +176,11 @@ const evaluate_map = {
       const result = evaluate(node.body, new_scope);
       if (result === BREAK_SINGAL) {
         break;
-      } else if (result === CONTINUE_SINGAL) {
+      }
+      if (result === CONTINUE_SINGAL) {
         continue;
-      } else if (result === RETURN_SINGAL) {
+      }
+      if (result === RETURN_SINGAL) {
         return result;
       }
     } while (evaluate(node.test, scope));
@@ -193,9 +196,11 @@ const evaluate_map = {
       const result = evaluate(node.body, new_scope);
       if (result === BREAK_SINGAL) {
         break;
-      } else if (result === CONTINUE_SINGAL) {
+      }
+      if (result === CONTINUE_SINGAL) {
         continue;
-      } else if (result === RETURN_SINGAL) {
+      }
+      if (result === RETURN_SINGAL) {
         return result;
       }
     }
@@ -212,9 +217,11 @@ const evaluate_map = {
       const result = evaluate(node.body, new_scope);
       if (result === BREAK_SINGAL) {
         break;
-      } else if (result === CONTINUE_SINGAL) {
+      }
+      if (result === CONTINUE_SINGAL) {
         continue;
-      } else if (result === RETURN_SINGAL) {
+      }
+      if (result === RETURN_SINGAL) {
         return result;
       }
     }
@@ -257,7 +264,7 @@ const evaluate_map = {
   ObjectExpression: (node: ESTree.ObjectExpression, scope: Scope) => {
     const object: any = {};
     for (const property1 of node.properties) {
-      if (true) {
+      {
         const property = property1 as ESTree.Property;
         const kind = property.kind;
 
@@ -301,22 +308,21 @@ const evaluate_map = {
           return result.result;
         }
       };
-    } else {
-      return function (...args: any[]) {
-        const new_scope = new Scope("function", scope, true);
-        for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier>node.params[i];
-          new_scope.$declar("const", name, args[i]);
-        }
-        //@ts-ignore
-        new_scope.$declar("const", "this", this);
-        new_scope.$declar("const", "arguments", arguments);
-        const result = evaluate(node.body, new_scope);
-        if (result === RETURN_SINGAL) {
-          return result.result;
-        }
-      };
     }
+    return function (...args: any[]) {
+      const new_scope = new Scope("function", scope, true);
+      for (let i = 0; i < node.params.length; i++) {
+        const { name } = <ESTree.Identifier>node.params[i];
+        new_scope.$declar("const", name, args[i]);
+      }
+      //@ts-ignore
+      new_scope.$declar("const", "this", this);
+      new_scope.$declar("const", "arguments", arguments);
+      const result = evaluate(node.body, new_scope);
+      if (result === RETURN_SINGAL) {
+        return result.result;
+      }
+    };
   },
 
   UnaryExpression: (node: ESTree.UnaryExpression, scope: Scope) => {
@@ -330,9 +336,8 @@ const evaluate_map = {
         if (node.argument.type === "Identifier") {
           const $var = scope.$find(node.argument.name);
           return typeof $var?.value;
-        } else {
-          return typeof evaluate(node.argument, scope);
         }
+        return typeof evaluate(node.argument, scope);
       },
       delete: () => {
         // delete 是真麻烦
@@ -340,12 +345,12 @@ const evaluate_map = {
           const { object, property, computed } = node.argument;
           if (computed) {
             return delete evaluate(object, scope)[evaluate(property, scope)];
-          } else {
-            return delete evaluate(object, scope)[
-              (<ESTree.Identifier>property).name
-            ];
           }
-        } else if (node.argument.type === "Identifier") {
+          return delete evaluate(object, scope)[
+            (<ESTree.Identifier>property).name
+          ];
+        }
+        if (node.argument.type === "Identifier") {
           const $this = scope.$find("this");
           if ($this) return $this.value[node.argument.name];
         }
@@ -469,9 +474,8 @@ const evaluate_map = {
     const { object, property, computed } = node;
     if (computed) {
       return evaluate(object, scope)[evaluate(property, scope)];
-    } else {
-      return evaluate(object, scope)?.[(<ESTree.Identifier>property).name];
     }
+    return evaluate(object, scope)?.[(<ESTree.Identifier>property).name];
   },
 
   ConditionalExpression: (node: ESTree.ConditionalExpression, scope: Scope) => {
@@ -488,10 +492,9 @@ const evaluate_map = {
     if (node.callee.type === "MemberExpression") {
       const object = evaluate(node.callee.object, scope);
       return func.apply(object, args);
-    } else {
-      const this_val = scope.$find("this");
-      return func.apply(this_val?.value, args);
     }
+    const this_val = scope.$find("this");
+    return func.apply(this_val?.value, args);
   },
 
   NewExpression: (node: ESTree.NewExpression, scope: Scope) => {
@@ -502,7 +505,7 @@ const evaluate_map = {
   },
 
   SequenceExpression: (node: ESTree.SequenceExpression, scope: Scope) => {
-    let last;
+    let last: any;
     for (const expr of node.expressions) {
       last = evaluate(expr, scope);
     }
@@ -623,7 +626,7 @@ const evaluate_map = {
     scope: Scope,
   ) => {
     if (node.async) {
-      return async function (...args: any[]) {
+      return async (...args: any[]) => {
         // noinspection DuplicatedCode
         const new_scope = new Scope("function", scope, true);
         for (let i = 0; i < node.params.length; i++) {
@@ -634,33 +637,30 @@ const evaluate_map = {
         if (node.expression) {
           //(a,b)=> a+b
           return result;
-        } else {
-          // (a,b)=>{return a+b}
-          if (result === RETURN_SINGAL) {
-            return result.result;
-          }
         }
-      };
-    } else {
-      return function (...args: any[]) {
-        // noinspection DuplicatedCode
-        const new_scope = new Scope("function", scope, true);
-        for (let i = 0; i < node.params.length; i++) {
-          const { name } = <ESTree.Identifier>node.params[i];
-          new_scope.$declar("const", name, args[i]);
-        }
-        const result = evaluate(node.body, new_scope);
-        if (node.expression) {
-          //(a,b)=> a+b
-          return result;
-        } else {
-          // (a,b)=>{return a+b}
-          if (result === RETURN_SINGAL) {
-            return result.result;
-          }
+        // (a,b)=>{return a+b}
+        if (result === RETURN_SINGAL) {
+          return result.result;
         }
       };
     }
+    return (...args: any[]) => {
+      // noinspection DuplicatedCode
+      const new_scope = new Scope("function", scope, true);
+      for (let i = 0; i < node.params.length; i++) {
+        const { name } = <ESTree.Identifier>node.params[i];
+        new_scope.$declar("const", name, args[i]);
+      }
+      const result = evaluate(node.body, new_scope);
+      if (node.expression) {
+        //(a,b)=> a+b
+        return result;
+      }
+      // (a,b)=>{return a+b}
+      if (result === RETURN_SINGAL) {
+        return result.result;
+      }
+    };
   },
 };
 

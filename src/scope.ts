@@ -1,4 +1,4 @@
-import { Any } from "./type.ts";
+import type { Any } from "./type.ts";
 
 export type ScopeType = "function" | "loop" | "switch" | "block";
 
@@ -84,11 +84,11 @@ export class Scope {
     const name: string = this.prefix + raw_name;
     if (this.content.has(name)) {
       return this.content.get(name)!;
-    } else if (this.parent) {
-      return this.parent.$find(raw_name);
-    } else {
-      return null;
     }
+    if (this.parent) {
+      return this.parent.$find(raw_name);
+    }
+    return null;
   }
 
   private $declar_(
@@ -101,9 +101,8 @@ export class Scope {
     if (!$var) {
       this.content.set(name, new ScopeVar(type, value));
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   $var(raw_name: string, value: Any): boolean {
@@ -117,9 +116,8 @@ export class Scope {
     if (!$var) {
       this.content.set(name, new ScopeVar("var", value));
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   $declar(kind: Kind, raw_name: string, value: any): boolean {

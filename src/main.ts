@@ -1,11 +1,11 @@
-import { ESTree, acorn } from "../deps.ts";
+import { type ESTree, acorn } from "../deps.ts";
 import evaluate from "./eval.ts";
 import { Scope } from "./scope.ts";
-import { Any } from "./type.ts";
+import type { Any } from "./type.ts";
 declare const require: (module: string) => Any;
 const options = {
   sourceType: "script",
-  ecmaVersion: 2022,
+  ecmaVersion: 2023,
   locations: true,
   ranges: true,
 } as acorn.Options;
@@ -54,7 +54,7 @@ const default_api: { [key: string]: Any } = {
   Promise,
 };
 
-import babel from "https://esm.sh/@babel/standalone@7.21.8";
+import babel from "https://esm.sh/@babel/standalone@^7";
 
 export function run(
   this: Any,

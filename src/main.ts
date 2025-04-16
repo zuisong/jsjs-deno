@@ -12,7 +12,7 @@ const options = {
 
 // 导出默认对象
 const default_api: { [key: string]: Any } = {
-  ...window,
+  ...globalThis,
   fetch,
   console,
 
@@ -26,8 +26,8 @@ const default_api: { [key: string]: Any } = {
   encodeURIComponent,
   decodeURI,
   decodeURIComponent,
-  escape: window.escape,
-  unescape: window.unescape,
+  escape: globalThis.escape,
+  unescape: globalThis.unescape,
   Map,
   Infinity,
   NaN,

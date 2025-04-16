@@ -1,56 +1,52 @@
 {
-  "version": "3",
-  "packages": {
-    "specifiers": {
-      "jsr:@std/assert": "jsr:@std/assert@0.225.1",
-      "jsr:@std/assert@^0.225.1": "jsr:@std/assert@0.225.1",
-      "jsr:@std/fmt@^0.225.0": "jsr:@std/fmt@0.225.0",
-      "jsr:@std/fs@^0.229.0": "jsr:@std/fs@0.229.1",
-      "jsr:@std/internal@^0.225.0": "jsr:@std/internal@0.225.0",
-      "jsr:@std/io@^0.224.0": "jsr:@std/io@0.224.0",
-      "jsr:@std/log": "jsr:@std/log@0.224.1"
+  "version": "4",
+  "specifiers": {
+    "jsr:@std/assert@*": "1.0.12",
+    "jsr:@std/fmt@^1.0.5": "1.0.6",
+    "jsr:@std/fs@^1.0.11": "1.0.16",
+    "jsr:@std/internal@^1.0.6": "1.0.6",
+    "jsr:@std/io@~0.225.2": "0.225.2",
+    "jsr:@std/log@*": "0.224.14"
+  },
+  "jsr": {
+    "@std/assert@1.0.8": {
+      "integrity": "ebe0bd7eb488ee39686f77003992f389a06c3da1bbd8022184804852b2fa641b"
     },
-    "jsr": {
-      "@std/assert@0.225.1": {
-        "integrity": "7342fa32a6d82c2c7c98ffea566baa9a892d04b22815b9fcf62cedeee5764f9c",
-        "dependencies": [
-          "jsr:@std/fmt@^0.225.0",
-          "jsr:@std/internal@^0.225.0"
-        ]
-      },
-      "@std/fmt@0.225.0": {
-        "integrity": "982e7d1a8b8869338cc5b58e2669f7c6889ea9822f1278494dc43edba7f4c4b4"
-      },
-      "@std/fs@0.229.1": {
-        "integrity": "38d3fb31f0ca0a8c1118e039939188f32e291a3f7f17dc0868fec22024bdfadd"
-      },
-      "@std/internal@0.225.0": {
-        "integrity": "6f501a91aa5ee992f8f9ffb45fa103bc04031df65f6a3550e1c5d7e6304cd34a"
-      },
-      "@std/io@0.224.0": {
-        "integrity": "0aff885d21d829c050b8a08b1d71b54aed5841aecf227f8d77e99ec529a11e8e"
-      },
-      "@std/log@0.224.1": {
-        "integrity": "243688532289298670034915da5e2987cc544938c566c7d508afb7e06ec3fe9d",
-        "dependencies": [
-          "jsr:@std/assert@^0.225.1",
-          "jsr:@std/fmt@^0.225.0",
-          "jsr:@std/fs@^0.229.0",
-          "jsr:@std/io@^0.224.0"
-        ]
-      }
+    "@std/assert@1.0.12": {
+      "integrity": "08009f0926dda9cbd8bef3a35d3b6a4b964b0ab5c3e140a4e0351fbf34af5b9a",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/fmt@1.0.6": {
+      "integrity": "a2c56a69a2369876ddb3ad6a500bb6501b5bad47bb3ea16bfb0c18974d2661fc"
+    },
+    "@std/fs@1.0.16": {
+      "integrity": "81878f62b6eeda0bf546197fc3daa5327c132fee1273f6113f940784a468b036"
+    },
+    "@std/internal@1.0.6": {
+      "integrity": "9533b128f230f73bd209408bb07a4b12f8d4255ab2a4d22a1fd6d87304aca9a4"
+    },
+    "@std/io@0.225.2": {
+      "integrity": "3c740cd4ee4c082e6cfc86458f47e2ab7cb353dc6234d5e9b1f91a2de5f4d6c7"
+    },
+    "@std/log@0.224.14": {
+      "integrity": "257f7adceee3b53bb2bc86c7242e7d1bc59729e57d4981c4a7e5b876c808f05e",
+      "dependencies": [
+        "jsr:@std/fmt",
+        "jsr:@std/fs",
+        "jsr:@std/io"
+      ]
     }
   },
   "redirects": {
-    "https://esm.sh/@babel/standalone@^7": "https://esm.sh/@babel/standalone@7.24.6",
-    "https://esm.sh/v135/@types/babel__standalone@~7/index.d.ts": "https://esm.sh/v135/@types/babel__standalone@7.1.7/index.d.ts"
+    "https://esm.sh/@babel/standalone@^7": "https://esm.sh/@babel/standalone@7.27.0",
+    "https://esm.sh/@types/babel__standalone@~7.1.9/index.d.ts": "https://esm.sh/@types/babel__standalone@7.1.9/index.d.ts"
   },
   "remote": {
-    "https://esm.sh/@babel/standalone@7.24.6": "97f5ea3fd45a3ec0e5c8a3416f554c85dcac756ddee4a042e9f398d819392457",
-    "https://esm.sh/acorn@8.10.0?dev&bundle": "51839913f2395c4ad883527f273e6e437635eccd92a49bdaf9eb845d9e23f629",
-    "https://esm.sh/acorn@8.11.3?dev&bundle": "7b3660ab7e56543e1543e6cef2a3dc9f810e9f726471c37c993dc31c6fd35e0b",
-    "https://esm.sh/v135/@babel/standalone@7.24.6/denonext/standalone.mjs": "fe57b5feaaf68cddcf989aa32285cae2c9ad6bd6a8207056e5c9d5cb80f150a4",
-    "https://esm.sh/v135/acorn@8.10.0/denonext/acorn.development.bundle.mjs": "66251b5bcea73c22f57b7397f107c5c9ce4aa6c70ece950d501a85d9850608ba",
-    "https://esm.sh/v135/acorn@8.11.3/denonext/acorn.development.bundle.mjs": "9bcac189b81d0668804123bfe27bbb83993d097934309a193f27a212ae8dceaa"
+    "https://esm.sh/@babel/standalone@7.27.0": "82a6873adc960aaa2ab9fcb605fc634754f5cd39ea121b442a0a000fbd24ef58",
+    "https://esm.sh/@babel/standalone@7.27.0/denonext/standalone.mjs": "6f94ca101fdcdf0b394117c26493444a6ad8ab3b0509b4faf843442877d15efb",
+    "https://esm.sh/acorn@8.11.3/denonext/acorn.development.bundle.mjs": "9aa59639bbdc0220337f8fe48b080924cb68c75dd496975cf9ffdf9743448e76",
+    "https://esm.sh/acorn@8.11.3?dev&bundle": "460a9a4118c9963f12519b7207410d0bbcf344f0cd387206b37d32021fdc7dc4"
   }
 }
